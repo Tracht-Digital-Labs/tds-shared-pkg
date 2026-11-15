@@ -16,12 +16,20 @@ export interface AbstractCoverProps {
 
 export function AbstractCover({ variant, style, className }: AbstractCoverProps) {
   return (
-    <img
-      src={tdsPlaceholder({ seed: `cover-${variant}` })}
-      alt=""
+    // Decoration, so a CSS background rather than an <img> (quality standard:
+    // a purely decorative graphic is CSS).
+    <div
       aria-hidden="true"
       className={className}
-      style={{ display: "block", width: "100%", height: "100%", objectFit: "cover", ...style }}
+      style={{
+        display: "block",
+        width: "100%",
+        height: "100%",
+        backgroundImage: `url("${tdsPlaceholder({ seed: `cover-${variant}` })}")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        ...style,
+      }}
     />
   );
 }

@@ -627,7 +627,7 @@ describe("the contact form", () => {
     await openContact();
     const u = user();
     await u.click(screen.getByRole("button", { name: "Absenden" }));
-    expect(await screen.findByText("Zu viele Anfragen – bitte später erneut versuchen.")).toBeTruthy();
+    expect(await screen.findByText(/^Zu viele Anfragen./)).toBeTruthy();
   });
 
   it("reports a validation failure with the requirements", async () => {

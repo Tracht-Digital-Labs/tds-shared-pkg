@@ -286,7 +286,10 @@ export default function ProductCard({
         </a>
       ) : variant === "card" ? (
         <a className="tds-product-card__media" href={product.url} tabIndex={-1} aria-hidden="true">
-          <img src={tdsPlaceholder({ seed: product.slug, monogram: product.title.charAt(0) })} alt="" loading="lazy" decoding="async" />
+          <span
+            className="tds-product-card__placeholder"
+            style={{ backgroundImage: `url("${tdsPlaceholder({ seed: product.slug, monogram: product.title.charAt(0) })}")` }}
+          />
         </a>
       ) : null}
 

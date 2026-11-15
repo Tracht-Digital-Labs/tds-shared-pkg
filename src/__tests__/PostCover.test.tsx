@@ -50,10 +50,11 @@ describe("PostCover", () => {
     expect(container.querySelector("img")?.getAttribute("src")).toBe("https://example.test/a.webp");
   });
 
-  it("falls back to the abstract geometry", () => {
+  it("falls back to the abstract geometry, drawn as CSS because it is decoration", () => {
     const { container } = render(<PostCover slug="s" coverHint={null} />);
-    expect(container.querySelector("img")?.getAttribute("src")).toMatch(/^data:image/);
-    expect(container.querySelector("img")?.getAttribute("aria-hidden")).toBe("true");
+    expect(container.querySelector("img")).toBeNull();
+    const cover = container.querySelector<HTMLElement>("[aria-hidden='true']");
+    expect(cover?.style.backgroundImage).toMatch(/data:image/);
   });
 });
 
@@ -67,6 +68,6 @@ describe("AbstractCover", () => {
 
   it("draws through the shared placeholder generator", () => {
     const { container } = render(<AbstractCover variant={2} />);
-    expect(container.querySelector("img")?.getAttribute("src")).toMatch(/^data:image\/svg\+xml/);
+    expect((container.firstElementChild as HTMLElement).style.backgroundImage).toMatch(/data:image\/svg\+xml/);
   });
 });

@@ -28,6 +28,7 @@ npm run test:run     # vitest; design.test.ts guards the CSS contracts
 - Never `outline: none` in a `:focus` rule, never `window.confirm()`, never a relative API `fetch`.
 - One event, one feedback primitive (toast, in-flow alert or pill).
 - New primitives are `tds-`-prefixed. No token name contains a digit.
+- Follows the TDS quality standard (`../tds-ops/standards/quality.md`): no AI slop, clean code. Exceptions: [docs/agents/quality.md](docs/agents/quality.md).
 - `version` is bumped by the release workflow; consumers pin minor-locked 0.x carets and must repin.
 
 ## Topic files
