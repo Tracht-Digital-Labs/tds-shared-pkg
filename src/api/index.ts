@@ -240,7 +240,7 @@ export const FAILURE_TEXT = {
 /**
  * One German sentence for a failed request, in the panel's established wording:
  *
- * - `null` (the request never reached the API) → `"<action> — die API ist nicht erreichbar."`
+ * - `null` (the request never reached the API) → `"<action>, die API ist nicht erreichbar."`
  * - 401/403 with `adminOnly` → `"Nur für Administratoren."`
  * - otherwise → `"<action> (HTTP 500)."`
  *
@@ -248,7 +248,7 @@ export const FAILURE_TEXT = {
  * to `"Fehler"`. For the API's own `{error}` text use `describeFailureFrom`.
  */
 export function describeFailure(res: Response | null, action = "Fehler", opts: { adminOnly?: boolean } = {}): string {
-  if (res === null) return `${action} — ${FAILURE_TEXT.unreachable}.`;
+  if (res === null) return `${action}, ${FAILURE_TEXT.unreachable}.`;
   if (opts.adminOnly && (res.status === 401 || res.status === 403)) return FAILURE_TEXT.adminOnly;
   return `${action} (HTTP ${res.status}).`;
 }

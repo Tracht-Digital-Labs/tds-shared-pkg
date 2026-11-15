@@ -29,7 +29,7 @@ describe("api helpers", () => {
   });
 
   it("describes failures in the panel's wording", async () => {
-    expect(describeFailure(null, "Speichern fehlgeschlagen")).toBe("Speichern fehlgeschlagen — die API ist nicht erreichbar.");
+    expect(describeFailure(null, "Speichern fehlgeschlagen")).toBe("Speichern fehlgeschlagen, die API ist nicht erreichbar.");
     expect(describeFailure(new Response("", { status: 500 }))).toBe("Fehler (HTTP 500).");
     expect(describeFailure(new Response("", { status: 403 }), "x", { adminOnly: true })).toBe("Nur für Administratoren.");
     expect(await describeFailureFrom(json({ error: "Name fehlt" }, 422))).toBe("Name fehlt (HTTP 422)");
@@ -84,7 +84,7 @@ describe("useRuntimeSettings", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("offline")));
     const b = renderHook(() => useRuntimeSettings("y"));
     await waitFor(() => expect(b.result.current.loaded).toBe(true));
-    expect(b.result.current.error).toBe("Einstellungen konnten nicht geladen werden — die API ist nicht erreichbar.");
+    expect(b.result.current.error).toBe("Einstellungen konnten nicht geladen werden, die API ist nicht erreichbar.");
   });
 });
 
