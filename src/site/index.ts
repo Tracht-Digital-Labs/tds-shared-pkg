@@ -44,3 +44,4 @@ export {
   type ImageCatalogOptions,
 } from "./imageCatalog";
 export { tdsPlaceholder, tdsPlaceholderSvg, placeholderHash, type PlaceholderOptions } from "./placeholder";
+export { withUtf8Charset } from "./charset";
