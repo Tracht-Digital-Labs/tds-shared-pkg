@@ -1,6 +1,6 @@
 # `src/cache/` and `src/site/`: the public sites' server side
 
-## Page cache (`@tracht-digital-solutions/tds-shared/cache`)
+## Page cache (`@tracht-digital-labs/tds-shared/cache`)
 
 The public SSR sites render on demand and store each page as a plain file the web server serves directly. A hit costs
 what a static build cost; a content change costs one render. The sites supply only their route knowledge. It imports

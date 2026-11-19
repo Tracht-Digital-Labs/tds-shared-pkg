@@ -13,7 +13,7 @@
  *
  * Import it after primitives.css:
  *
- *   @import "@tracht-digital-solutions/tds-shared/styles/prose.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/prose.css";
  *
  * NESTING A BLOG SURFACE INSIDE A PANEL: the CMS preview should look like
  * the published article, so give the preview container both the class and

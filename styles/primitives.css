@@ -7,9 +7,9 @@
  * is the whole point: a surface changes its look by setting a token, not
  * by re-declaring a class in its own global.css.
  *
- *   @import "@tracht-digital-solutions/tds-shared/styles/base.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/surfaces/<surface>.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/base.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/primitives.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/surfaces/<surface>.css";
  *
  * Split history: everything from `.section-num` down to `.app-version` was
  * moved here out of app.css, unchanged except that hard-coded radii became
@@ -164,7 +164,7 @@ button.chip[aria-pressed="true"] {
    badges with no colour coding at all; those call sites are fixed. If you
    need to map an untrusted/dynamic value (e.g. a status colour coming out
    of the database) use `resolveChipVariant()` from
-   `@tracht-digital-solutions/tds-shared` — Tailwind cannot statically
+   `@tracht-digital-labs/tds-shared` — Tailwind cannot statically
    extract an interpolated class name, and an unknown value must fall back
    to `neutral` rather than render an unstyled pill. */
 .chip--neutral {
@@ -1995,7 +1995,7 @@ button.tds-row:focus-visible {
 
 /* The panel a `.tds-menu-toggle` opens: a sheet docked under the header,
    keyed on `data-open` and driven by `mountMobileNav` from
-   `@tracht-digital-solutions/tds-shared/nav`.
+   `@tracht-digital-labs/tds-shared/nav`.
 
    Promoted from the landingpage header, which is the reference layout the
    public sites converged on. Three consumers today (landingpage, blog,
@@ -3202,7 +3202,7 @@ button.tds-row:focus-visible {
 
    The panel products navigate with Astro's ClientRouter, so the shell stays
    put and only the page swaps; their React islands read through
-   `@tracht-digital-solutions/tds-shared/data`, which paints the previously
+   `@tracht-digital-labs/tds-shared/data`, which paints the previously
    fetched answer immediately and refreshes it behind the user's back. Both
    of those need a way to say "what you are looking at is not final yet", and
    the whole point is that it looks the SAME on every screen — somebody who

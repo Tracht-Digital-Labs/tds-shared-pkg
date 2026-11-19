@@ -1,7 +1,7 @@
 /**
  * Server-side page cache for the three public Astro sites.
  *
- * Consumed as `@tracht-digital-solutions/tds-shared/cache`. **This entry point
+ * Consumed as `@tracht-digital-labs/tds-shared/cache`. **This entry point
  * imports `node:fs`, `node:path` and `node:crypto` and is therefore NEVER
  * re-exported from the package root** — `tds-shared`'s root entry is pulled
  * into every browser bundle in the workspace, and a Node builtin there breaks

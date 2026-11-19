@@ -1,6 +1,6 @@
 # AGENTS.md — tds-shared-pkg
 
-The shared library (`@tracht-digital-solutions/tds-shared`) consumed by **every** TDS frontend: the public
+The shared library (`@tracht-digital-labs/tds-shared`) consumed by **every** TDS frontend: the public
 sites (landing page, blog, tools, shop, auth, cards), the panel host and both products, every extension and
 tool pack, and the legacy portal. It owns the design tokens, surfaces and primitives, shared React islands,
 i18n copy, schemas, the API transport, the public sites' page cache and setup wizard, and the release

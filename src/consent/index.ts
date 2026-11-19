@@ -1,6 +1,6 @@
 /**
  * The consent manager. Import from
- * `@tracht-digital-solutions/tds-shared/consent`.
+ * `@tracht-digital-labs/tds-shared/consent`.
  *
  * Four pieces and a store:
  *

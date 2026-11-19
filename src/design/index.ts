@@ -2,7 +2,7 @@
  * Design-library runtime helpers.
  *
  * Consumed via
- * `import { resolveChipVariant } from "@tracht-digital-solutions/tds-shared/design"`.
+ * `import { resolveChipVariant } from "@tracht-digital-labs/tds-shared/design"`.
  *
  * Pure functions only — no side effects, so tree-shaking still works
  * (`sideEffects: ["*.css"]` in package.json).

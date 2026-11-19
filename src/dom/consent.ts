@@ -8,7 +8,7 @@
  * primitives.css styles both and nothing on screen differs.
  *
  *   <script>
- *     import { mountConsentBanner } from "@tracht-digital-solutions/tds-shared/dom";
+ *     import { mountConsentBanner } from "@tracht-digital-labs/tds-shared/dom";
  *     mountConsentBanner({ lang: "de", categories: ["analytics"], privacyUrl: "/legal/datenschutz" });
  *   </script>
  *
@@ -316,7 +316,7 @@ export type ConsentBannerHostOptions = Omit<MountConsentBannerOptions, "host" | 
  *
  *   <Fragment set:html={consentBannerHostMarkup({ lang, categories: ["analytics"], privacyUrl })} />
  *   <script>
- *     import { mountConsentBannerHost } from "@tracht-digital-solutions/tds-shared/dom";
+ *     import { mountConsentBannerHost } from "@tracht-digital-labs/tds-shared/dom";
  *     mountConsentBannerHost();
  *   </script>
  *

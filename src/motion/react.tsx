@@ -1,5 +1,5 @@
 /**
- * The React half of the motion layer — `@tracht-digital-solutions/tds-shared/motion/react`.
+ * The React half of the motion layer — `@tracht-digital-labs/tds-shared/motion/react`.
  *
  * Five primitives for the state changes CSS cannot animate: something leaving
  * the DOM, a list reflowing around it, a shared element gliding between two

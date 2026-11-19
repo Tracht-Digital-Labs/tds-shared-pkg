@@ -1,4 +1,4 @@
-import { ThemeToggle } from "@tracht-digital-solutions/tds-shared/components";
+import { ThemeToggle } from "@tracht-digital-labs/tds-shared/components";
 
 /**
  * Bare toggle — the icon button as it sits in a nav bar. Shows the moon

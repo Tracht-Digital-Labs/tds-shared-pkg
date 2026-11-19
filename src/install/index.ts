@@ -2,7 +2,7 @@
  * The host-side setup wizard, as a shared React island.
  *
  * Consumed via
- * `import { InstallWizard, profiles } from "@tracht-digital-solutions/tds-shared/install"`
+ * `import { InstallWizard, profiles } from "@tracht-digital-labs/tds-shared/install"`
  * from a thin `src/pages/install.astro` in each of the four static sites.
  *
  * It used to be PHP shipped inside this package and copied into `public/` by a

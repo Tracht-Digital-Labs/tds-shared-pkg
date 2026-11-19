@@ -2,7 +2,7 @@
  * Installable, offline-capable public sites — manifest and service worker.
  *
  * Consumed via `import { buildManifest, buildServiceWorker } from
- * "@tracht-digital-solutions/tds-shared/pwa"` from two PRERENDERED Astro
+ * "@tracht-digital-labs/tds-shared/pwa"` from two PRERENDERED Astro
  * endpoints per site (`/manifest.webmanifest`, `/sw.js`). Prerendered on
  * purpose: the service worker's version must change with the BUILD, not with
  * a server restart — a restart-scoped version would re-install the worker on

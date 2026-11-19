@@ -15,9 +15,9 @@
  * <html>, and in its global.css:
  *
  *   @import "tailwindcss";
- *   @import "@tracht-digital-solutions/tds-shared/styles/base.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/surfaces/marketing.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/base.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/primitives.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/surfaces/marketing.css";
  *
  * The attribute selector is deliberately NOT `:root[data-surface=...]` so a
  * surface can be nested inside another one (see surfaces/blog.css for the

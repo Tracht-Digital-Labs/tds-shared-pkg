@@ -3,7 +3,7 @@
  * `styles/app-shell.css`.
  *
  * Consumed via
- * `import { mountAppTabBar, mountSheet } from "@tracht-digital-solutions/tds-shared/app"`
+ * `import { mountAppTabBar, mountSheet } from "@tracht-digital-labs/tds-shared/app"`
  * from a NON-inline Astro `<script>` (an inline script is not bundled, so a
  * bare import would reach the browser unresolved — same rule as `./nav`).
  *

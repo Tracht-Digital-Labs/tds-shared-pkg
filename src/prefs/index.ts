@@ -3,7 +3,7 @@
  * properties and, when signed in, across devices.
  *
  * Consumed via
- * `import { writePrefs, startAccountPrefsSync } from "@tracht-digital-solutions/tds-shared/prefs"`.
+ * `import { writePrefs, startAccountPrefsSync } from "@tracht-digital-labs/tds-shared/prefs"`.
  *
  * ### Three stores, one record
  *

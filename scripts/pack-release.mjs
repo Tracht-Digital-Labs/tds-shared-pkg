@@ -38,7 +38,7 @@
  * does not survive a fifth copy, which is what the two panel products would
  * have made it. It is published from `tds-shared` instead and consumed as
  *
- *     "postbuild": "node node_modules/@tracht-digital-solutions/tds-shared/scripts/pack-release.mjs"
+ *     "postbuild": "node node_modules/@tracht-digital-labs/tds-shared/scripts/pack-release.mjs"
  *
  * There is no `exports` entry for it and none is needed: `node <path>` is a
  * filesystem lookup, not specifier resolution. The per-consumer values come
@@ -253,7 +253,7 @@ function verify() {
   //
   // Match IMPORT STATEMENTS, not the bare package name. Astro's client
   // hydration manifest maps module specifiers to emitted asset paths, so
-  // `"@tracht-digital-solutions/tds-shared/components":"_astro/index.…js"`
+  // `"@tracht-digital-labs/tds-shared/components":"_astro/index.…js"`
   // appears in entry.mjs as DATA on every healthy build. A grep for the name
   // alone would fail this check forever, for a string that is not an import.
   // Static and dynamic imports are scanned separately, because they fail
@@ -288,7 +288,7 @@ function verify() {
   const dynamicRe = /(?:^|[^\w$])_{0,2}(?:import|require)\s*\(\s*["']([^"']+)["']\s*\)/g;
   const browserOnly = new Set(config.browserOnly ?? []);
   const forbidden = [
-    { test: (s) => s.startsWith("@tracht-digital-solutions/"), why: "first-party package" },
+    { test: (s) => s.startsWith("@tracht-digital-labs/"), why: "first-party package" },
     // Build-only UNLESS the site ships them: the journal renders its OG cards
     // on demand and lists satori + @resvg/resvg-js in runtimeDependencies.
     {
@@ -357,7 +357,7 @@ function verify() {
 
   const shipped = JSON.parse(readFileSync(join(out, "package.json"), "utf8"));
   for (const name of Object.keys(shipped.dependencies ?? {})) {
-    if (name.startsWith("@tracht-digital-solutions/")) {
+    if (name.startsWith("@tracht-digital-labs/")) {
       problems.push(`release/package.json depends on ${name}; the host has no registry token`);
     }
   }

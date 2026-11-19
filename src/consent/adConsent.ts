@@ -5,7 +5,7 @@
  * the consent manager arrived, for one reason: `store.ts` has to keep writing
  * it, and a store importing a React component file to reach a localStorage
  * helper is backwards. `CookieNotice` re-exports these names, so
- * `@tracht-digital-solutions/tds-shared/components` still resolves every one
+ * `@tracht-digital-labs/tds-shared/components` still resolves every one
  * of them and no consumer had to change.
  *
  * WHY IT SURVIVES AT ALL. The blog's AdSense loader

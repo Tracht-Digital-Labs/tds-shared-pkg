@@ -1,6 +1,6 @@
 /**
  * Shared React UI components used across the TDS frontends. Import from
- * `@tracht-digital-solutions/tds-shared/components`.
+ * `@tracht-digital-labs/tds-shared/components`.
  */
 
 export { default as ThemeToggle } from "./ThemeToggle";
@@ -78,7 +78,7 @@ export { default as ToastHost } from "./ToastHost";
 export type { ToastHostProps } from "./ToastHost";
 /* The bus is re-exported here so a React island needs ONE import path; a
    plain-TS module (e.g. the host's dashboardLayout.ts) imports
-   `@tracht-digital-solutions/tds-shared/toast` instead and stays React-free. */
+   `@tracht-digital-labs/tds-shared/toast` instead and stays React-free. */
 export {
   showToast,
   toast,
@@ -91,7 +91,7 @@ export {
 
 /* Same reasoning as the toast bus: an island gets the panel API transport from
    the one import path it already uses, while a plain-TS module imports
-   `@tracht-digital-solutions/tds-shared/api` and stays React-free. */
+   `@tracht-digital-labs/tds-shared/api` and stays React-free. */
 export {
   apiBase,
   apiFetch,
@@ -107,7 +107,7 @@ export {
 
 /* Same reasoning again for the theme runtime: the profile page's Darstellung
    tab is an island and gets it from here, while the host's plain-TS
-   preferences sync imports `@tracht-digital-solutions/tds-shared/theme`. */
+   preferences sync imports `@tracht-digital-labs/tds-shared/theme`. */
 export {
   applyThemePreference,
   currentTheme,

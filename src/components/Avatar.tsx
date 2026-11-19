@@ -54,7 +54,7 @@ function hash(value: string): number {
  * initials.
  *
  * Geometry and colour come from `.tds-avatar` in
- * `@tracht-digital-solutions/tds-shared/styles/primitives.css`; this component
+ * `@tracht-digital-labs/tds-shared/styles/primitives.css`; this component
  * only picks which of the categorical hues the fallback uses, derived from a
  * stable seed so a person's colour doesn't change between the profile menu and
  * a user list.

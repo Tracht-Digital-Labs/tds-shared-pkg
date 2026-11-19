@@ -1,6 +1,6 @@
 # `src/install/`: the host-side setup wizard
 
-A React island exported as `@tracht-digital-solutions/tds-shared/install`; each public site mounts it from a thin
+A React island exported as `@tracht-digital-labs/tds-shared/install`; each public site mounts it from a thin
 `src/pages/install.astro` with `noindex`.
 
 **On the site domains nothing executes** (PHP is disabled on every frontend subdomain; only `api.tracht-digital.de`

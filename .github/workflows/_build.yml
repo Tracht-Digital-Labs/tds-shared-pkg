@@ -36,7 +36,7 @@ jobs:
           node-version: '22'
           cache: 'npm'
           registry-url: 'https://npm.pkg.github.com'
-          scope: '@tracht-digital-solutions'
+          scope: '@tracht-digital-labs'
 
       - name: Install
         run: npm ci

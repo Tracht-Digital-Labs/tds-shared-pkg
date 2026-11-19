@@ -15,7 +15,7 @@ export interface SkeletonProps {
 
 /**
  * A single pulsing placeholder block. Styled by the `.tds-skeleton` class in
- * `@tracht-digital-solutions/tds-shared/styles/base.css`. Decorative
+ * `@tracht-digital-labs/tds-shared/styles/base.css`. Decorative
  * (`aria-hidden`) — wrap a group of skeletons in a container carrying
  * `role="status"` + an accessible label so the pending state is announced once.
  * The global reduced-motion clamp freezes the pulse to a static block.

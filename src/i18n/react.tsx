@@ -3,7 +3,7 @@
  * data. Persist the chosen language in `localStorage` under "tdsLang"
  * and keep `<html lang>` in sync.
  *
- * Import from `@tracht-digital-solutions/tds-shared/i18n/react`. The
+ * Import from `@tracht-digital-labs/tds-shared/i18n/react`. The
  * Astro frontends use this from their React islands (`client:load` /
  * `client:visible`).
  *

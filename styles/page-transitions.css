@@ -1,6 +1,6 @@
 /* Cross-page transitions for the public multi-page sites.
 
-   Opt-in: `@import "@tracht-digital-solutions/tds-shared/styles/page-transitions.css";`
+   Opt-in: `@import "@tracht-digital-labs/tds-shared/styles/page-transitions.css";`
    after base.css — AND put `pageTransitionOptIn` from `./astro` inline as the
    first element of `<head>`. The `@view-transition` rule below only counts if
    Chrome has it at the incoming page's first rendering opportunity, and a

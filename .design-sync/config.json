@@ -1,5 +1,5 @@
 {
-  "pkg": "@tracht-digital-solutions/tds-shared",
+  "pkg": "@tracht-digital-labs/tds-shared",
   "globalName": "TdsShared",
   "projectId": "2138b4ee-6c75-46d4-9eef-8155e02bf3ca",
   "shape": "package",

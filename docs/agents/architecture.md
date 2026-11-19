@@ -111,7 +111,7 @@ ignores `X-Forwarded-Proto`; TLS ends at Plesk's nginx, so it always reads `http
 `postbuild`:
 
 ```jsonc
-"postbuild": "node node_modules/@tracht-digital-solutions/tds-shared/scripts/pack-release.mjs"
+"postbuild": "node node_modules/@tracht-digital-labs/tds-shared/scripts/pack-release.mjs"
 ```
 
 - No `exports` entry is needed, but `"scripts"` must be in `files` (`releaseScripts.test.ts`).

@@ -414,7 +414,7 @@ describe("cross-entry state sharing", () => {
    * tests pin that, because a refactor back to `let cached = null` type-checks,
    * builds and passes every other test in this file.
    */
-  const STATE_KEY = Symbol.for("@tracht-digital-solutions/tds-shared:api-state");
+  const STATE_KEY = Symbol.for("@tracht-digital-labs/tds-shared:api-state");
 
   it("parks its mutable state on globalThis, not in module scope", () => {
     const held = (globalThis as Record<symbol, unknown>)[STATE_KEY];
@@ -441,7 +441,7 @@ describe("cross-entry state sharing", () => {
   });
 
   it("keys the slot by Symbol.for so it cannot collide with an unrelated global", () => {
-    expect(STATE_KEY.description).toBe("@tracht-digital-solutions/tds-shared:api-state");
+    expect(STATE_KEY.description).toBe("@tracht-digital-labs/tds-shared:api-state");
     // Invisible to enumeration, which some environments do over globalThis.
     expect(Object.keys(globalThis)).not.toContain("api-state");
   });

@@ -11,9 +11,9 @@
  * Import order for a panel surface:
  *
  *   @import "tailwindcss";
- *   @import "@tracht-digital-solutions/tds-shared/styles/base.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/app.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/surfaces/panel.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/base.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/app.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/surfaces/panel.css";
  *
  * The marketing surface must NOT import this file — it renders none of
  * this chrome. It imports ./primitives.css directly instead. (Before the

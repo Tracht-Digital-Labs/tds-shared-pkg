@@ -11,7 +11,7 @@ export interface SkeletonTextProps {
 /**
  * A stack of placeholder text lines built on {@link Skeleton}, with a shorter
  * last line so it reads as a paragraph. Styled by `.tds-skeleton-text` in
- * `@tracht-digital-solutions/tds-shared/styles/base.css`. Decorative
+ * `@tracht-digital-labs/tds-shared/styles/base.css`. Decorative
  * (`aria-hidden`) — announce the pending state on the surrounding container.
  */
 export default function SkeletonText({

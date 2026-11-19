@@ -52,7 +52,7 @@ export const tdsViteBuild = {
 
 /**
  * The packages behind `motion`, for an SSR site's `vite.ssr.noExternal`:
- * `noExternal: [/^@tracht-digital-solutions\//, "zod", ...motionSsrNoExternal]`.
+ * `noExternal: [/^@tracht-digital-labs\//, "zod", ...motionSsrNoExternal]`.
  *
  * `./components` (ToastHost, FormAlert) and `./motion/react` import `motion`,
  * which is a DEPENDENCY of this package — so it is in the tree, but Vite
@@ -98,7 +98,7 @@ export function tdsClientDirectives() {
       }) => {
         addClientDirective({
           name: "when",
-          entrypoint: "@tracht-digital-solutions/tds-shared/astro/client-when",
+          entrypoint: "@tracht-digital-labs/tds-shared/astro/client-when",
         });
       },
     },

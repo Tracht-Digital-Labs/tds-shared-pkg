@@ -45,7 +45,7 @@ interface ApiState {
   headersProvider: HeadersProvider | null;
 }
 
-const STATE_KEY = Symbol.for("@tracht-digital-solutions/tds-shared:api-state");
+const STATE_KEY = Symbol.for("@tracht-digital-labs/tds-shared:api-state");
 
 type StateHost = typeof globalThis & { [STATE_KEY]?: ApiState };
 

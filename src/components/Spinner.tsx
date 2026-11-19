@@ -19,7 +19,7 @@ export interface SpinnerProps {
 
 /**
  * Rotating ring spinner. Styled by the `.tds-spinner` class in
- * `@tracht-digital-solutions/tds-shared/styles/base.css` (base, not app.css, so
+ * `@tracht-digital-labs/tds-shared/styles/base.css` (base, not app.css, so
  * the marketing site gets it too — like `.cookie-notice`). Uses the brand
  * `tds-spin` keyframe; the global reduced-motion clamp in base.css freezes it to
  * a static ring for users who ask for less motion. `role="status"` + the

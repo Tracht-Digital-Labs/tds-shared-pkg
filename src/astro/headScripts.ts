@@ -11,7 +11,7 @@ import { PREFS_COOKIE } from "../prefs/cookie.js";
  * of a public site's `<head>`:
  *
  * ```astro
- * import { pageTransitionOptIn } from "@tracht-digital-solutions/tds-shared/astro";
+ * import { pageTransitionOptIn } from "@tracht-digital-labs/tds-shared/astro";
  * <head>
  *   <style is:inline set:html={pageTransitionOptIn} />
  *   …
@@ -44,7 +44,7 @@ export const pageTransitionOptIn: string =
  * Consume it as an inline script with `set:html` — NOT as a template body:
  *
  * ```astro
- * import { themeBootstrapScript } from "@tracht-digital-solutions/tds-shared/astro";
+ * import { themeBootstrapScript } from "@tracht-digital-labs/tds-shared/astro";
  * <script is:inline set:html={themeBootstrapScript} />
  * ```
  *

@@ -14,9 +14,9 @@
  * emits zero woff2 and every face silently falls back to a system font.
  *
  *   @import "tailwindcss";
- *   @import "@tracht-digital-solutions/tds-shared/styles/base.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/surfaces/<surface>.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/base.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/primitives.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/surfaces/<surface>.css";
  *
  * THE LAYER STACK (one design library, three surfaces):
  *   base.css        tokens + resets + type primitives   — every app
@@ -387,7 +387,7 @@
 
   /* --- Motion -------------------------------------------------------
      `--tds-ease-out` is the same curve exported as `ease` from
-     `@tracht-digital-solutions/tds-shared/motion`. Keep the two in sync:
+     `@tracht-digital-labs/tds-shared/motion`. Keep the two in sync:
      CSS transitions and framer-motion springs must not drift apart. */
   --tds-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --tds-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);

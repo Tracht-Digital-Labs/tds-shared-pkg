@@ -9,7 +9,7 @@ const DEFAULT_PRIVACY_URL = "https://tracht-digital.de/legal/datenschutz";
    consent manager arrived — `consent/store.ts` writes through to it, and a
    store importing a React component file to reach a localStorage helper is
    backwards. Re-exported from here unchanged, so
-   `@tracht-digital-solutions/tds-shared/components` still resolves every one
+   `@tracht-digital-labs/tds-shared/components` still resolves every one
    of these names and no consumer had to change. */
 export {
   AD_CONSENT_KEY,

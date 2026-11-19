@@ -1,7 +1,7 @@
 /* App shell for the public sites on a phone — tab bar, bottom sheets,
    collapsing header, touch basics.
 
-   Opt-in: `@import "@tracht-digital-solutions/tds-shared/styles/app-shell.css";`
+   Opt-in: `@import "@tracht-digital-labs/tds-shared/styles/app-shell.css";`
    after base.css/primitives.css. Behaviour lives in `tds-shared/app`
    (`mountAppTabBar`, `mountSheet`, `mountAppHeader`).
 

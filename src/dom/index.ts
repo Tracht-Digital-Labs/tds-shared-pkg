@@ -7,11 +7,11 @@
  * are a button and one click handler, so here they are without a framework:
  *
  *   ---
- *   import { themeToggleMarkup } from "@tracht-digital-solutions/tds-shared/dom";
+ *   import { themeToggleMarkup } from "@tracht-digital-labs/tds-shared/dom";
  *   ---
  *   <Fragment set:html={themeToggleMarkup({ labelToDark, labelToLight })} />
  *   <script>
- *     import { mountThemeToggles } from "@tracht-digital-solutions/tds-shared/dom";
+ *     import { mountThemeToggles } from "@tracht-digital-labs/tds-shared/dom";
  *     mountThemeToggles();
  *   </script>
  *

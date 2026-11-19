@@ -1,4 +1,4 @@
-# @tracht-digital-solutions/tds-shared
+# @tracht-digital-labs/tds-shared
 
 > **Setting this up from scratch?** See [`INSTALL.md`](INSTALL.md) for
 > the step-by-step bring-up (build → publish → grant repo access).
@@ -10,18 +10,18 @@
 Shared design system (CSS foundation + React components), TypeScript
 types, Zod schemas, i18n strings, and motion presets used across the TDS
 frontends. Internal package — not published to the public npm registry;
-lives on **GitHub Packages** under the `@tracht-digital-solutions` scope.
+lives on **GitHub Packages** under the `@tracht-digital-labs` scope.
 
 ## Install
 
 Each consumer repo (frontends and any tool that imports the package)
 needs a **project-level `.npmrc`** that scopes
-`@tracht-digital-solutions` to GitHub Packages and authenticates via
+`@tracht-digital-labs` to GitHub Packages and authenticates via
 the `NPM_TOKEN` env var:
 
 ```ini
 # .npmrc (committed to each consumer repo)
-@tracht-digital-solutions:registry=https://npm.pkg.github.com
+@tracht-digital-labs:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=${NPM_TOKEN}
 ```
 
@@ -34,7 +34,7 @@ Setup differs between local dev and CI:
 1. Generate a GitHub Personal Access Token (classic) at
    <https://github.com/settings/tokens> with the `read:packages`
    scope. If your tokens require SSO, click "Configure SSO" next to
-   the token and authorize it for the `Tracht-Digital-Solutions` org.
+   the token and authorize it for the `Tracht-Digital-Labs` org.
 
 2. Export the token as `NPM_TOKEN` whenever you `npm install` in a
    consumer repo. Two equivalent ways:
@@ -58,7 +58,7 @@ Setup differs between local dev and CI:
 
    ```bash
    curl -sI -H "Authorization: Bearer $NPM_TOKEN" \
-     https://npm.pkg.github.com/@tracht-digital-solutions/tds-shared \
+     https://npm.pkg.github.com/@tracht-digital-labs/tds-shared \
      | head -1
    # expect: HTTP/2 200
    ```
@@ -86,7 +86,7 @@ consumer repo (e.g. `tds-admin`) tries to read this package from
   with:
     node-version: '22'
     registry-url: 'https://npm.pkg.github.com'
-    scope: '@tracht-digital-solutions'
+    scope: '@tracht-digital-labs'
 
 - name: Install
   # See "Lockfile portability" below for why --no-package-lock
@@ -96,7 +96,7 @@ consumer repo (e.g. `tds-admin`) tries to read this package from
 ```
 
 The PAT needs `read:packages` on the
-`Tracht-Digital-Solutions` org (classic token, SSO-authorized).
+`Tracht-Digital-Labs` org (classic token, SSO-authorized).
 Stored once per consumer repo as the `NPM_TOKEN` secret.
 
 > **Why not `GITHUB_TOKEN` + "Manage Actions access"?** The package
@@ -121,19 +121,19 @@ binaries.
 ## Subpath imports
 
 ```ts
-import type { BlogPost, Project, Invoice } from "@tracht-digital-solutions/tds-shared";
-import { ContactSchema, BlogPostCreateSchema } from "@tracht-digital-solutions/tds-shared/schemas";
-import { translations, type Language } from "@tracht-digital-solutions/tds-shared/i18n";
-import { LanguageProvider, useLang } from "@tracht-digital-solutions/tds-shared/i18n/react";
-import { ease, transitions } from "@tracht-digital-solutions/tds-shared/motion";
-import { Presence, AnimatedList, AnimatedItem, TabIndicator, Collapse } from "@tracht-digital-solutions/tds-shared/motion/react";
-import { ThemeToggle, CookieNotice, LiveChatCta, ToastHost, Spinner, Skeleton, SkeletonText, PostCover, AbstractCover, coverVariant } from "@tracht-digital-solutions/tds-shared/components";
-import { toast } from "@tracht-digital-solutions/tds-shared/toast";
-import { mountMobileNav } from "@tracht-digital-solutions/tds-shared/nav";
-import { apiFetch, apiUrl } from "@tracht-digital-solutions/tds-shared/api";
-import { invalidate, staleClass, useCachedJson } from "@tracht-digital-solutions/tds-shared/data";
-import { renderMarkdown } from "@tracht-digital-solutions/tds-shared/markdown";
-import { tdsViteBuild, cssTarget } from "@tracht-digital-solutions/tds-shared/astro";
+import type { BlogPost, Project, Invoice } from "@tracht-digital-labs/tds-shared";
+import { ContactSchema, BlogPostCreateSchema } from "@tracht-digital-labs/tds-shared/schemas";
+import { translations, type Language } from "@tracht-digital-labs/tds-shared/i18n";
+import { LanguageProvider, useLang } from "@tracht-digital-labs/tds-shared/i18n/react";
+import { ease, transitions } from "@tracht-digital-labs/tds-shared/motion";
+import { Presence, AnimatedList, AnimatedItem, TabIndicator, Collapse } from "@tracht-digital-labs/tds-shared/motion/react";
+import { ThemeToggle, CookieNotice, LiveChatCta, ToastHost, Spinner, Skeleton, SkeletonText, PostCover, AbstractCover, coverVariant } from "@tracht-digital-labs/tds-shared/components";
+import { toast } from "@tracht-digital-labs/tds-shared/toast";
+import { mountMobileNav } from "@tracht-digital-labs/tds-shared/nav";
+import { apiFetch, apiUrl } from "@tracht-digital-labs/tds-shared/api";
+import { invalidate, staleClass, useCachedJson } from "@tracht-digital-labs/tds-shared/data";
+import { renderMarkdown } from "@tracht-digital-labs/tds-shared/markdown";
+import { tdsViteBuild, cssTarget } from "@tracht-digital-labs/tds-shared/astro";
 ```
 
 ## Rendering markdown
@@ -156,7 +156,7 @@ Every call from a frontend product (or a `tds-ext-*` island inside one) to the
 composed backend goes through `apiFetch`:
 
 ```ts
-import { apiFetch } from "@tracht-digital-solutions/tds-shared/api";
+import { apiFetch } from "@tracht-digital-labs/tds-shared/api";
 
 const res = await apiFetch("/contact/messages?status=new");
 if (!res.ok) { /* handle it — apiFetch never throws and never redirects */ }
@@ -189,7 +189,7 @@ starting from an empty `useState` after every ClientRouter navigation:
 
 ```tsx
 import { invalidate, staleClass, useCachedJson } from
-  "@tracht-digital-solutions/tds-shared/data";
+  "@tracht-digital-labs/tds-shared/data";
 
 const { data, loading, stale, error } =
   useCachedJson<{ messages: Message[] }>("/contact/messages?status=new");
@@ -223,14 +223,14 @@ code that is not React:
 
 ```astro
 ---
-import { ToastHost } from "@tracht-digital-solutions/tds-shared/components";
+import { ToastHost } from "@tracht-digital-labs/tds-shared/components";
 ---
 <ToastHost client:idle lang="de" />
 ```
 
 ```ts
 // In an island, or in a plain <script> module — same call either way.
-import { toast } from "@tracht-digital-solutions/tds-shared/toast";
+import { toast } from "@tracht-digital-labs/tds-shared/toast";
 
 const res = await fetch(url, { method: "PUT", body });
 if (res.ok) toast.success("Gespeichert.");
@@ -269,7 +269,7 @@ three link sources — but the behaviour comes from here:
 </div>
 
 <script>
-  import { mountMobileNav } from "@tracht-digital-solutions/tds-shared/nav";
+  import { mountMobileNav } from "@tracht-digital-labs/tds-shared/nav";
   const toggle = document.getElementById("menu-toggle");
   const panel = document.getElementById("mobile-menu");
   if (toggle && panel) mountMobileNav({ toggle, panel });
@@ -308,7 +308,7 @@ valid on `blog.` and `tools.` — this is what makes it visible there.
 
 ```astro
 ---
-import { AccountMenu } from "@tracht-digital-solutions/tds-shared/components";
+import { AccountMenu } from "@tracht-digital-labs/tds-shared/components";
 ---
 <div class="flex items-center">
   <AccountMenu client:idle lang={lang} loggedOut="login" />
@@ -356,15 +356,15 @@ then **exactly one** surface layer — and sets the matching `data-surface` on
 /* src/styles/global.css */
 @import "tailwindcss/index.css";   /* NOT the bare "tailwindcss" — see below */
 
-@import "@tracht-digital-solutions/tds-shared/styles/base.css";
-@import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
-@import "@tracht-digital-solutions/tds-shared/styles/surfaces/marketing.css";
+@import "@tracht-digital-labs/tds-shared/styles/base.css";
+@import "@tracht-digital-labs/tds-shared/styles/primitives.css";
+@import "@tracht-digital-labs/tds-shared/styles/surfaces/marketing.css";
 
 /* Tailwind ignores node_modules, and the shared islands (ThemeToggle,
    CookieNotice, Spinner, ConfirmDialog, ToastHost) are built out of utility
    classes — without this they render unstyled, with no error and no warning.
    MUST come after the @imports; @source before an @import is a build error. */
-@source "../../node_modules/@tracht-digital-solutions/tds-shared";
+@source "../../node_modules/@tracht-digital-labs/tds-shared";
 ```
 
 Three things that are load-bearing and easy to get wrong:
@@ -423,7 +423,7 @@ the browser floor moves in one place:
 
 ```js
 // astro.config.mjs
-import { tdsViteBuild } from "@tracht-digital-solutions/tds-shared/astro";
+import { tdsViteBuild } from "@tracht-digital-labs/tds-shared/astro";
 
 export default defineConfig({
   vite: { build: { ...tdsViteBuild } },
@@ -470,12 +470,12 @@ Order of resolution:
 1. Confirm the env var is set in the shell that runs `npm`:
    `echo $NPM_TOKEN` (bash) / `echo $env:NPM_TOKEN` (PowerShell).
 2. Confirm the token itself works:
-   `curl -sI -H "Authorization: Bearer $NPM_TOKEN" https://npm.pkg.github.com/@tracht-digital-solutions/tds-shared | head -1`
+   `curl -sI -H "Authorization: Bearer $NPM_TOKEN" https://npm.pkg.github.com/@tracht-digital-labs/tds-shared | head -1`
    should return `HTTP/2 200`. If 401, the token is invalid /
    missing `read:packages` / not SSO-authorized for the org.
 3. Confirm npm is reading the right `.npmrc`:
    `npm config get registry` should show `https://npm.pkg.github.com`
-   for queries to the `@tracht-digital-solutions` scope. Run
+   for queries to the `@tracht-digital-labs` scope. Run
    `npm config ls -l | grep -i tracht` to see which file contributes
    the registry mapping.
 4. The project `.npmrc` overrides the user `~/.npmrc` for any key

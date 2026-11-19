@@ -43,7 +43,7 @@ function useCollapse(wanted: boolean): MotionReact["Collapse"] | null {
 
 /**
  * Inline form error banner. Styled by the `.form-alert` class in
- * `@tracht-digital-solutions/tds-shared/styles/primitives.css`, which renders it in
+ * `@tracht-digital-labs/tds-shared/styles/primitives.css`, which renders it in
  * the semantic `--color-danger` token (not the brand accent) with a leading
  * warning icon and a tinted panel — so a failed submit is unmistakably a
  * failure in both light and dark themes. `role="alert"` + `aria-live` make

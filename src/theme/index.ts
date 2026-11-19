@@ -2,7 +2,7 @@
  * Theme runtime — reading, applying and announcing the user's theme choice.
  *
  * Consumed via
- * `import { applyThemePreference } from "@tracht-digital-solutions/tds-shared/theme"`.
+ * `import { applyThemePreference } from "@tracht-digital-labs/tds-shared/theme"`.
  *
  * ### Why this is its own entry point
  *

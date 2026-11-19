@@ -2,7 +2,7 @@
  * Toast bus — the transport half of the toast system.
  *
  * Consumed via
- * `import { toast } from "@tracht-digital-solutions/tds-shared/toast"`.
+ * `import { toast } from "@tracht-digital-labs/tds-shared/toast"`.
  *
  * ### Why a window event and not a React context
  *

@@ -3,7 +3,7 @@
  * actually goes.
  *
  * Consumed via
- * `import { apiFetch } from "@tracht-digital-solutions/tds-shared/api"`.
+ * `import { apiFetch } from "@tracht-digital-labs/tds-shared/api"`.
  *
  * ### Why this module exists
  *

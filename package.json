@@ -1,5 +1,5 @@
 {
-  "name": "@tracht-digital-solutions/tds-shared",
+  "name": "@tracht-digital-labs/tds-shared",
   "version": "0.68.0",
   "description": "Shared design system (CSS foundation + React components), TypeScript types, Zod schemas, i18n strings, and motion presets used across the TDS frontends.",
   "license": "UNLICENSED",
@@ -276,6 +276,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tracht-Digital-Solutions/tds-shared-pkg.git"
+    "url": "git+https://github.com/Tracht-Digital-Labs/tds-shared-pkg.git"
   }
 }

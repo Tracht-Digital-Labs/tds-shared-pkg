@@ -1,6 +1,6 @@
 /**
  * Shared motion presets used site-wide. Frontends consume these via
- * `import { ease, fadeUp, ... } from "@tracht-digital-solutions/tds-shared/motion"`.
+ * `import { ease, fadeUp, ... } from "@tracht-digital-labs/tds-shared/motion"`.
  *
  * Presets plus `transitionUpdate` (native View Transitions) — never the
  * `motion` runtime, so any page may import this entry for free.

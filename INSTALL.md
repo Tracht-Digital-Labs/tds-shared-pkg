@@ -6,7 +6,7 @@
 > easing — published to GitHub Packages and consumed by every frontend.
 >
 > **You install this once, then never think about it again.** Every other
-> frontend repo's `package.json` references `@tracht-digital-solutions/tds-shared`
+> frontend repo's `package.json` references `@tracht-digital-labs/tds-shared`
 > from the GitHub Packages registry.
 
 ## Prerequisites
@@ -21,7 +21,7 @@
 ## 1. Clone + install
 
 ```bash
-git clone https://github.com/Tracht-Digital-Solutions/tds-shared-pkg.git
+git clone https://github.com/Tracht-Digital-Labs/tds-shared-pkg.git
 cd tds-shared-pkg
 npm install
 ```
@@ -46,10 +46,10 @@ npm run build
 npm link
 
 # in the consumer (e.g. tds-landingpage-frontend/)
-npm link @tracht-digital-solutions/tds-shared
+npm link @tracht-digital-labs/tds-shared
 ```
 
-Undo by running `npm unlink @tracht-digital-solutions/tds-shared` in
+Undo by running `npm unlink @tracht-digital-labs/tds-shared` in
 the consumer and re-running `npm install` to pull the published
 version back.
 
@@ -66,7 +66,7 @@ git push origin main --follow-tags
 
 The workflow runs `npm publish` with `GITHUB_TOKEN`, so no PAT
 management is needed. The package surfaces at
-<https://github.com/orgs/Tracht-Digital-Solutions/packages> after
+<https://github.com/orgs/Tracht-Digital-Labs/packages> after
 the workflow completes.
 
 For a manual publish (rare — usually only during the first ever
@@ -89,13 +89,13 @@ need a `read:packages` token to install this package in CI. The
 auto-provided `secrets.GITHUB_TOKEN` does **not** work cross-repo
 — it only authorizes the workflow against packages owned by the
 running repo, so a `tds-admin` workflow asking GitHub Packages for
-`@tracht-digital-solutions/tds-shared` (owned by `tds-shared-pkg`) gets
+`@tracht-digital-labs/tds-shared` (owned by `tds-shared-pkg`) gets
 `403 read_package` even with `packages: read` set.
 
 The convention we settled on:
 
 1. Mint a **classic** PAT with `read:packages` on the
-   `Tracht-Digital-Solutions` org. SSO-authorize it for the org if
+   `Tracht-Digital-Labs` org. SSO-authorize it for the org if
    your account requires it.
 2. Add it as a repo secret named **`NPM_TOKEN`** in each consumer
    repo (`tds-admin`, `tds-blog-frontend`, `tds-customer-legacy-frontend`,
@@ -120,17 +120,17 @@ NPM_TOKEN=ghp_xxxx npm install
 # Should succeed without 401 or 403.
 
 # Smoke-test the published exports:
-node -e "console.log(Object.keys(require('@tracht-digital-solutions/tds-shared')))"
+node -e "console.log(Object.keys(require('@tracht-digital-labs/tds-shared')))"
 ```
 
 ## Related repos
 
 This package is consumed by:
 
-- [tds-landingpage-frontend](https://github.com/Tracht-Digital-Solutions/tds-landingpage-frontend) — design system (base.css), components, i18n strings, motion
-- [tds-blog-frontend](https://github.com/Tracht-Digital-Solutions/tds-blog-frontend) — design system (base + app.css), components, i18n strings, `BlogPost` type
-- [tds-admin](https://github.com/Tracht-Digital-Solutions/tds-admin) — design system (base + app.css), components, types, zod schemas
-- [tds-customer-legacy-frontend](https://github.com/Tracht-Digital-Solutions/tds-customer-legacy-frontend) — design system (base + app.css), components, types, zod schemas
+- [tds-landingpage-frontend](https://github.com/Tracht-Digital-Labs/tds-landingpage-frontend) — design system (base.css), components, i18n strings, motion
+- [tds-blog-frontend](https://github.com/Tracht-Digital-Labs/tds-blog-frontend) — design system (base + app.css), components, i18n strings, `BlogPost` type
+- [tds-admin](https://github.com/Tracht-Digital-Labs/tds-admin) — design system (base + app.css), components, types, zod schemas
+- [tds-customer-legacy-frontend](https://github.com/Tracht-Digital-Labs/tds-customer-legacy-frontend) — design system (base + app.css), components, types, zod schemas
 
 ## Troubleshooting
 
@@ -145,5 +145,5 @@ per section 5.
 
 **`npm publish` says "402 Payment Required" or "scope not found".**
 The `.npmrc` is targeting the public npm registry. Make sure
-`@tracht-digital-solutions:registry=https://npm.pkg.github.com` is
+`@tracht-digital-labs:registry=https://npm.pkg.github.com` is
 set, and that your token has `write:packages`.

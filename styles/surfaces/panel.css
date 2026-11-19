@@ -48,10 +48,10 @@
  *
  * Usage — `data-surface="panel"` on <html>, plus:
  *
- *   @import "@tracht-digital-solutions/tds-shared/styles/base.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/app.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/surfaces/panel.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/base.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/primitives.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/app.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/surfaces/panel.css";
  */
 
 [data-surface="panel"] {

@@ -2,7 +2,7 @@
  * The release spine — `scripts/pack-release.mjs` + `scripts/app.cjs` — is
  * consumed by PATH, not by specifier:
  *
- *     node node_modules/@tracht-digital-solutions/tds-shared/scripts/pack-release.mjs
+ *     node node_modules/@tracht-digital-labs/tds-shared/scripts/pack-release.mjs
  *
  * Nothing in TypeScript, in tsup or in any consumer's build refers to these two
  * files, so every ordinary gate in this repo is blind to them. What is not
@@ -30,7 +30,7 @@ describe("release scripts", () => {
 
   it("resolves the project root from the CONSUMER's cwd", () => {
     // Deriving it from `import.meta.url` — which is what the per-site copies
-    // did — resolves to `node_modules/@tracht-digital-solutions/` once the
+    // did — resolves to `node_modules/@tracht-digital-labs/` once the
     // script is published, so it would read tds-shared's own package.json and
     // report a missing `tds.release` section for a consumer that has one.
     const src = read("scripts/pack-release.mjs");

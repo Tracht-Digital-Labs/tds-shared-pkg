@@ -32,7 +32,7 @@
  * revalidation delay does not remotely justify. A full reload starts cold, and
  * that is correct.
  *
- * ### Not to be confused with `@tracht-digital-solutions/tds-shared/cache`
+ * ### Not to be confused with `@tracht-digital-labs/tds-shared/cache`
  *
  * That one is the public sites' server-side, file-backed *page* cache. This one
  * is a per-tab, in-memory *data* cache in the browser. They share no code and

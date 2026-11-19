@@ -1,5 +1,5 @@
 /**
- * The vanilla half of the motion layer — `@tracht-digital-solutions/tds-shared/motion/dom`.
+ * The vanilla half of the motion layer — `@tracht-digital-labs/tds-shared/motion/dom`.
  *
  * For server-rendered public pages that want Motion WITHOUT React: a CTA that
  * follows the pointer, a photo that settles into place, a page that leaves

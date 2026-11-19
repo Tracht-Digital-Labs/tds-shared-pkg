@@ -2,7 +2,7 @@
  * Mobile navigation mechanics — the behaviour half of the mobile menu.
  *
  * Consumed via
- * `import { mountMobileNav } from "@tracht-digital-solutions/tds-shared/nav"`,
+ * `import { mountMobileNav } from "@tracht-digital-labs/tds-shared/nav"`,
  * paired with the `.tds-mobile-menu` / `.tds-menu-toggle` / `.tds-menu-bar*`
  * primitives in `styles/primitives.css`.
  *

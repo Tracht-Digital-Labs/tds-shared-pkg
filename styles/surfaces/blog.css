@@ -11,10 +11,10 @@
  *
  * Usage — `data-surface="blog"` on <html>, plus:
  *
- *   @import "@tracht-digital-solutions/tds-shared/styles/base.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/prose.css";
- *   @import "@tracht-digital-solutions/tds-shared/styles/surfaces/blog.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/base.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/primitives.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/prose.css";
+ *   @import "@tracht-digital-labs/tds-shared/styles/surfaces/blog.css";
  *
  * WHY THE SELECTOR IS AN ATTRIBUTE, NOT `:root[data-surface]`:
  * the blog-CMS editor in the admin panel renders a live markdown preview

@@ -3,7 +3,7 @@
  * Fails the build on a control that bypasses the shared design library.
  *
  * WHY THIS EXISTS. There are no CSS files in any extension package — every
- * style comes from `@tracht-digital-solutions/tds-shared`. A `<button>` with
+ * style comes from `@tracht-digital-labs/tds-shared`. A `<button>` with
  * no `btn` class therefore has no padding, no radius and no 44px
  * coarse-pointer target, and an `<input>` with no `field` class is worse than
  * unstyled: Tailwind's preflight zeroes borders, so it renders INVISIBLE and

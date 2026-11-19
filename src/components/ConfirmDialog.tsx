@@ -33,7 +33,7 @@ export interface ConfirmDialogProps {
  * bury it). Hand-rolled div overlays get every one of those wrong by default.
  *
  * Styled by `.tds-modal*` in
- * `@tracht-digital-solutions/tds-shared/styles/primitives.css`, including a
+ * `@tracht-digital-labs/tds-shared/styles/primitives.css`, including a
  * `::backdrop` rule — so it inherits the surface's card geometry and needs no
  * per-app CSS.
  *
