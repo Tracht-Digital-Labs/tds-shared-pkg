@@ -2,6 +2,10 @@
 
 `npm run test:run` runs the vitest suite in `src/__tests__/`.
 
+CI runs Node 22. On Node 25 or later the built-in `localStorage` global shadows jsdom's and every
+component suite fails with `Cannot read properties of undefined (reading 'clear')`; run
+`NODE_OPTIONS=--no-experimental-webstorage npm run test:run` there.
+
 ## `design.test.ts` guards the CSS contracts
 
 Every failure mode in the design system is silent in a browser (a missing token resolves to nothing, an unknown variant

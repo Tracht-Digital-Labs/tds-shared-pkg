@@ -10,6 +10,9 @@
  * Fixed colours rather than tokens: an SVG in a data URI sees no custom
  * properties. Each ground is one the brand also uses in dark mode.
  */
+
+import { escapeXml } from "./seo";
+
 const NAVY = "#050f68";
 const BORDEAUX = "#820933";
 const CORAL = "#ff7a9c";
@@ -45,9 +48,6 @@ export function placeholderHash(seed: string | number): number {
   }
   return h >>> 0;
 }
-
-const escapeXml = (text: string) =>
-  text.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[c]!);
 
 /** The picture as SVG markup. */
 export function tdsPlaceholderSvg({ seed, width = 1200, height = 750, monogram }: PlaceholderOptions): string {

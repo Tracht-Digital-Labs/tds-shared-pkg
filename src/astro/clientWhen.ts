@@ -1,6 +1,7 @@
 import { mayHaveSession } from "../components/accountAuth.js";
 import { CONSENT_OPEN_EVENT, readConsent } from "../consent/store.js";
 import { apiFetch } from "../api/index.js";
+import { whenIdle } from "../dom/idle.js";
 
 /**
  * `client:when` — hydrate an island only when this visitor needs it (0.60).
@@ -39,12 +40,6 @@ import { apiFetch } from "../api/index.js";
 
 type Hydrate = () => Promise<void>;
 type Load = () => Promise<Hydrate>;
-
-/** The `client:idle` timing, once the answer is yes. */
-function whenIdle(run: () => void): void {
-  if ("requestIdleCallback" in window) window.requestIdleCallback(run, { timeout: 2000 });
-  else setTimeout(run, 200);
-}
 
 const CHAT_HIDDEN_KEY = "tds-live-chat-hidden";
 

@@ -36,6 +36,7 @@ import {
   type OptionalCategory,
 } from "../consent/categories";
 import { CONSENT_OPEN_EVENT, readConsent, takeConsentOpenRequest, writeConsent } from "../consent/store.js";
+import { whenIdle } from "./idle.js";
 
 export interface MountConsentBannerOptions {
   /** UI language. Defaults to German. */
@@ -70,12 +71,6 @@ function el<K extends keyof HTMLElementTagNameMap>(
   for (const [name, value] of Object.entries(attrs)) node.setAttribute(name, value);
   if (text !== undefined) node.textContent = text;
   return node;
-}
-
-function whenIdle(run: () => void): void {
-  const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
-  if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(run, { timeout: 2000 });
-  else window.setTimeout(run, 200);
 }
 
 /**

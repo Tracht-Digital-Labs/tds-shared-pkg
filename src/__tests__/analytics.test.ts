@@ -140,6 +140,78 @@ describe("startAnalytics", () => {
     }
   });
 
+  it("reports each scroll milestone once per page view", async () => {
+    grant();
+    const scrollTo = (y: number) => {
+      Object.defineProperty(window, "scrollY", { value: y, configurable: true });
+      window.dispatchEvent(new Event("scroll"));
+    };
+    Object.defineProperty(document.documentElement, "scrollHeight", { value: 2000, configurable: true });
+    try {
+      start();
+      await settle();
+      expect(events().filter((e) => e.t === "scroll")).toEqual([]);
+      scrollTo(600); // innerHeight 768 → 600 of 1232 scrollable ≈ 49 %
+      await settle();
+      scrollTo(1232);
+      scrollTo(1232);
+      await settle();
+      // Scroll events don't flush on their own; they ride along with the next batch.
+      window.dispatchEvent(new Event("pagehide"));
+      await settle();
+      const milestones = events().filter((e) => e.t === "scroll").map((e) => e.n);
+      expect(milestones).toEqual([25, 50, 75, 100]);
+    } finally {
+      delete (document.documentElement as { scrollHeight?: number }).scrollHeight;
+      delete (window as { scrollY?: number }).scrollY;
+    }
+  });
+
+  it("counts a page that fits the viewport as fully scrolled", async () => {
+    grant();
+    start();
+    await settle();
+    expect(events().filter((e) => e.t === "scroll").map((e) => e.n)).toEqual([25, 50, 75, 100]);
+  });
+
+  it("sends the engaged time when the page is hidden", async () => {
+    grant();
+    start();
+    await vi.advanceTimersByTimeAsync(5000);
+    Object.defineProperty(document, "visibilityState", { value: "hidden", configurable: true });
+    try {
+      document.dispatchEvent(new Event("visibilitychange"));
+      await settle();
+      const exit = events().find((e) => e.t === "exit");
+      expect(exit?.n).toBeGreaterThanOrEqual(5000);
+    } finally {
+      delete (document as { visibilityState?: string }).visibilityState;
+    }
+  });
+
+  it("counts a back/forward-cache restore as a fresh page view with fresh milestones", async () => {
+    grant();
+    start();
+    await settle();
+    window.dispatchEvent(Object.assign(new Event("pageshow"), { persisted: true }));
+    await settle();
+    expect(events().filter((e) => e.t === "pageview")).toHaveLength(2);
+    expect(events().filter((e) => e.t === "scroll" && e.n === 100)).toHaveLength(2);
+  });
+
+  it("stops listening once stopped", async () => {
+    grant();
+    document.body.innerHTML = `<button data-track="hero">x</button>`;
+    start();
+    await settle();
+    stop!();
+    stop = null;
+    const before = beacons.length;
+    document.querySelector("button")!.click();
+    await settle();
+    expect(beacons).toHaveLength(before);
+  });
+
   it("honours Global Privacy Control even after consent", async () => {
     vi.stubGlobal("navigator", { ...navigator, globalPrivacyControl: true, sendBeacon: () => true });
     grant();

@@ -28,6 +28,7 @@ import { ensureDailyGate } from "./daily.js";
 import { PageCacheStore, tokenMatches, type CacheEntry } from "./store.js";
 import { isCacheableMethod } from "./key.js";
 import { resolveEvents, type CacheEvent, type EventMap } from "./events.js";
+import { jsonResponse as json } from "../http/json.js";
 
 /** The subset of Astro's middleware context this needs. */
 export interface CacheContext {
@@ -158,13 +159,6 @@ function isStorable(contentType: string): boolean {
     // file-backed cache as HTML so publishing content never requires a build.
     t.includes("image/png")
   );
-}
-
-function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
-  });
 }
 
 /** The two halves a site mounts. */

@@ -1,5 +1,5 @@
-import { THEME_ATTRIBUTE, type Theme } from "../design/index.js";
-import { applyThemePreference } from "./index.js";
+import type { Theme } from "../design/index.js";
+import { applyThemePreference, currentTheme } from "./index.js";
 import { cssEase } from "../motion/index.js";
 import { buildClone, mirrorAttributes } from "./previewClone.js";
 
@@ -35,11 +35,6 @@ export interface ThemeToggleOptions {
   commit?: (apply: () => void) => void;
 }
 
-
-/** The theme the document is in right now. Never a cached value — see `openPreview`. */
-export function currentTheme(): Theme {
-  return document.documentElement.getAttribute(THEME_ATTRIBUTE) === "dark" ? "dark" : "light";
-}
 
 
 /**
