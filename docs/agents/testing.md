@@ -25,6 +25,7 @@ no `outline: none` in `:focus`; lane publishers set and clear; durations from to
 | `PostCover.test.tsx` | No bare `var(--tds-flat-tint)` |
 | `AccountMenu.test.tsx` | Absolute auth origin for writes, DELETE logout, hint keys |
 | `prefs.test.ts` | Bottom-fixed elements add `--tds-tabbar-lane` |
+| `cache/pageCache.test.ts` | Middleware hit/miss/304/HEAD/refresh and every bypass rule; control-plane auth, errors, purge, rebuild outcomes and concurrency. Mutation check: 19 breakages, 19 caught |
 | `LiveChatCta.test.tsx` | See below |
 
 ## `vi.stubGlobal` is not undone by `vi.restoreAllMocks()`
