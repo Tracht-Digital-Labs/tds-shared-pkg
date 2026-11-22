@@ -11,7 +11,9 @@ does not yet, and why. Remove an entry when it is fixed.
 | `styles/base.css` | ~2240 | Open, same reason as `primitives.css`. |
 | `styles/app.css` | ~880 | Open, same reason. |
 | `styles/app-shell.css` | ~500 | Open, same reason. |
-| `scripts/geo-audit.mjs`, `scripts/pack-release.mjs` | ~490, ~410 | Build scripts, not shipped. Open. |
+| `scripts/geo-audit.mjs` | ~490 | Open. Shipped as the `tds-geo-audit` bin. |
+
+Split on 2026-11-22: `scripts/pack-release.mjs` (one function per step, the start check in `release/verify.mjs`).
 
 Split on 2026-11-21: `analytics/index.ts` (one collector per measurement in `collectors.ts`, ids in `identity.ts`),
 `cache/middleware.ts` (control plane in `control.ts`, shared header names in `protocol.ts`).
