@@ -22,6 +22,7 @@ no `outline: none` in `:focus`; lane publishers set and clear; durations from to
 | `api.test.ts` | Cross-entry transport state; runtime config resolution |
 | `installer.test.ts`, `installChecks.test.ts` | Profiles, no key in generated config, list/map counting, reachability wording |
 | `releaseScripts.test.ts` | `scripts` is in `files`, every spine file exists, `app.cjs` stays CommonJS |
+| `geoAudit.test.ts` | Runs the `tds-geo-audit` bin against a site served in-process: a clean site passes, a broken one is held as a snapshot naming every failure and warning. Mutation check: 20 breakages, 20 caught |
 | `packRelease.test.ts` | Runs `pack-release.mjs` against a fake `dist/`: tree layout, startup-file fallback, release stamp, build gate by the runtime formula, refusals, and every import-scan rule. Mutation check: 24 breakages, 23 caught (the `satori` exemption needs an `npm install`) |
 | `PostCover.test.tsx` | No bare `var(--tds-flat-tint)` |
 | `AccountMenu.test.tsx` | Absolute auth origin for writes, DELETE logout, hint keys |

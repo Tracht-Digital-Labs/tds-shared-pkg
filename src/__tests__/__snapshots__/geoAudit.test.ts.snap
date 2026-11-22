@@ -1,0 +1,70 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`geo-audit > names every rule a broken site breaks 1`] = `
+"Audited 8 pages, 2 internal link targets, 2 social images, 37 checks.
+  /  (7/43 chars, 18 words)
+  /en/  (10/46 chars, 11 words)
+  /doppelt/  (7/7 chars, 2 words)
+  /versteckt/  (61/53 chars, 10 words)
+  /guide/eins/  (18/54 chars, 12 words)
+  /guide/zwei/  (18/54 chars, 10 words)
+  /kontakt/  (15/51 chars, 1 words)
+  /leer/  (0/0 chars, 9 words)
+
+Warnings (4):
+  · /: heading skips from h1 to h3 ("Sprung")
+  · /doppelt/: WebPage references @id https://example.test/#nobody, which nothing on the page declares
+  · /doppelt/: only 2 words in <main>
+  · /: links to /moved/, a redirect to /
+
+Failures (48):
+  ✗ robots.txt: GPTBot is shut out of the whole site
+  ✗ robots.txt: GPTBot may crawl /api/
+  ✗ robots.txt: does not advertise the sitemap index
+  ✗ https://example.test/sitemap-1.xml: status 404
+  ✗ /: banned word "nahtlos" in the visible text
+  ✗ /: <img src="/a.png"> has no alt attribute
+  ✗ /: unparsable link http://[
+  ✗ /doppelt/: html has no lang
+  ✗ /doppelt/: description is 7 characters: zu kurz
+  ✗ /doppelt/: canonical is missing
+  ✗ /doppelt/: no hreflang x-default
+  ✗ /doppelt/: 2 <h1> elements
+  ✗ /doppelt/: JSON-LD does not parse: <parser message>
+  ✗ /doppelt/: @id https://example.test/#x is declared as both WebPage and Organization
+  ✗ /doppelt/: JSON-LD carries aggregateRating, which this site refuses
+  ✗ /doppelt/: JSON-LD carries Product, which this site refuses
+  ✗ /versteckt/: listed in the sitemap but served noindex
+  ✗ /versteckt/: title is 61 characters: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  ✗ /guide/eins/: dateModified 2026-11-01 is not shown as a <time> on the page
+  ✗ /guide/eins/: no lead paragraph under the headline
+  ✗ /guide/eins/: no byline linking to the person behind the page
+  ✗ /guide/eins/: a decision table without an outside source
+  ✗ /guide/zwei/: JSON-LD lacks Article or TechArticle
+  ✗ /guide/zwei/: guide page without dateModified
+  ✗ /guide/zwei/: no lead paragraph under the headline
+  ✗ /guide/zwei/: no byline linking to the person behind the page
+  ✗ /leer/: no <title>
+  ✗ /leer/: no meta description
+  ✗ /leer/: Open Graph title or description missing
+  ✗ /leer/: no og:image
+  ✗ /leer/: 0 <h1> elements
+  ✗ /fehlt/: status 404 for a URL listed in the sitemap
+  ✗ /doppelt/: same title as /
+  ✗ /: hreflang x-default is not reciprocal with /en/
+  ✗ /en/: hreflang x-default is not reciprocal with /
+  ✗ /doppelt/: hreflang en points at /nirgends/, which the sitemap does not list
+  ✗ /: links to /gone/, which answers 410
+  ✗ /og-missing.png: og:image answers 404 text/html
+  ✗ llms.txt: content-type is text/html
+  ✗ llms.txt: 880 bytes is over the 400-byte budget
+  ✗ llms.txt: does not name https://example.test/en/
+  ✗ llms.txt: does not name https://example.test/doppelt/
+  ✗ llms.txt: does not name https://example.test/versteckt/
+  ✗ llms.txt: does not name https://example.test/guide/eins/
+  ✗ llms.txt: does not name https://example.test/guide/zwei/
+  ✗ llms.txt: does not name https://example.test/kontakt/
+  ✗ llms.txt: does not name https://example.test/leer/
+  ✗ llms.txt: does not name https://example.test/fehlt/
+"
+`;

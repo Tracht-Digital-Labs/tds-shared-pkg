@@ -36,7 +36,7 @@ src/
 ├── cache/                 SERVER-ONLY page cache (node:fs); own entry point
 ├── site/                  server helpers the public sites shared by copy
 └── install/               host-side setup wizard (React island)
-scripts/                   pack-release.mjs, release/verify.mjs, app.cjs (release spine); geo-audit.mjs, lint-primitives.mjs (bins)
+scripts/                   pack-release.mjs, release/verify.mjs, app.cjs (release spine); geo-audit.mjs (+ geo-audit/), lint-primitives.mjs (bins)
 ```
 
 Each directory with consumers is its own `exports` entry (`./api`, `./data`, `./cache`, `./site`, `./install`,
