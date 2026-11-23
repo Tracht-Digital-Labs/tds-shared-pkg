@@ -1,0 +1,350 @@
+/* === Surfaces: card / page / widget / settings ===================== */
+
+/* The base elevated surface. Radius AND elevation come from the surface
+   layer, so the same class is a shadowed rounded card on marketing and a
+   hard-edged colour block on the blog. */
+.tds-card {
+  background: var(--color-card);
+  border: var(--tds-border-hairline) solid var(--color-line);
+  border-radius: var(--tds-radius-card);
+  box-shadow: var(--tds-elevation-card);
+  /* No `box-shadow` here. Transitioning a blurred shadow repaints the whole
+     blur every frame, and the panel's hover rule (app.css) also translates
+     the card — so the shadow was being re-rasterised on a layer that had
+     already been promoted. The panel expresses its hover lift with transform
+     plus a static raised shadow instead. */
+  transition:
+    border-color var(--tds-dur-base) var(--tds-ease-out),
+    background-color var(--tds-dur-base) var(--tds-ease-out);
+}
+
+/* Page shell + header. Every extension page renders
+   `<section class="tds-page">` with an `<h1 class="tds-page__title">`.
+   Tailwind's preflight strips heading sizes, so without an explicit title
+   rule every extension page title rendered at body size. */
+.tds-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.tds-page__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.tds-page__title {
+  font-family: var(--font-display);
+  font-weight: var(--tds-weight-display-tight);
+  letter-spacing: var(--tds-tracking-display-tight);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--color-black);
+}
+.tds-page__lede {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+  text-wrap: pretty;
+}
+
+/* Dashboard widget card. */
+.tds-widget {
+  background: var(--color-card);
+  border: var(--tds-border-hairline) solid var(--color-line);
+  border-radius: var(--tds-radius-card);
+  box-shadow: var(--tds-elevation-card);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.tds-widget__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+/* The headline number. Tabular figures so a live-updating metric does not
+   jitter its own width. */
+.tds-widget__metric {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-black);
+  font-variant-numeric: tabular-nums;
+}
+
+/* One block in the /einstellungen list, contributed by an extension. */
+.tds-settings-section {
+  background: var(--color-card);
+  border: var(--tds-border-hairline) solid var(--color-line);
+  border-radius: var(--tds-radius-card);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.tds-settings-section__title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-black);
+}
+/* The CONTENT wrapper an extension renders for its own settings slot.
+   Deliberately not `.tds-settings-section`: the Einstellungen host already
+   wraps every contributed panel in one, so an extension using the outer class
+   too would nest a card inside a card (double border, double padding,
+   double background). This is just the inner stack. */
+.tds-settings-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* === Lists / tables / empty states ================================= */
+
+/* Row list — the panel's universal "list of records" shape (tickets,
+   posts, authors, users). Bordered rows, no radius of their own beyond
+   the container's. */
+.tds-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.tds-list__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-line);
+  transition: background-color var(--tds-dur-base) var(--tds-ease-out);
+}
+.tds-list__row:last-child {
+  border-bottom: 0;
+}
+/* `:focus-within` alongside `:hover` — a row is a container, so the thing
+   that actually takes focus is the link or button INSIDE it. Without this a
+   keyboard user tabbing down a list gets no row-level feedback at all while
+   a mouse user gets it for free. Same reasoning for the table and the panel
+   cards/widgets further down. */
+.tds-list__row:hover,
+.tds-list__row:focus-within {
+  background: var(--tds-hover-wash);
+}
+
+.tds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.tds-table th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--color-line);
+}
+/* The small-caps treatment belongs to COLUMN headings only. Applied to every
+   `th`, it also caught `<th scope="row">` — a row header is a label for its
+   row, not a heading for a column — so a module name and its package id
+   rendered as 11px letterspaced uppercase muted text. On a phone that block
+   wrapped over six lines and dominated the table. */
+.tds-table thead th {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.tds-table tbody th {
+  font-size: 0.875rem;
+  color: var(--color-ink);
+}
+.tds-table td {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-ink);
+}
+.tds-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.tds-table td {
+  /* The row hover below had no transition, so tables snapped while the
+     visually identical `.tds-list__row` faded. Declared on the cell because
+     that is what actually paints the background. */
+  transition: background-color var(--tds-dur-base) var(--tds-ease-out);
+}
+.tds-table tbody tr:hover td,
+.tds-table tbody tr:focus-within td {
+  background: var(--tds-hover-wash);
+}
+
+/* Phone widths: let a wide table scroll instead of losing its right-hand
+   columns.
+
+   `width: 100%` is only a hint — the min-content width of four to seven
+   columns (each with 1.5rem of cell padding, several holding an unbroken
+   e-mail or a `.btn`) always wins, and NOTHING between the table and the
+   viewport scrolls. `body { overflow-x: hidden }` (base.css) then CLIPS the
+   overflow rather than revealing it, so the rightmost columns simply cease
+   to exist with no scrollbar to hint at them. On the module page that was
+   the *Aktion* column, i.e. the update button itself.
+
+   `display: block` makes the table its own scroll container; the rows still
+   lay out against each other because the browser generates an anonymous
+   table box around them, so the columns stay aligned. Same treatment
+   `.tds-prose table` has carried for the blog since the library was split —
+   the panel's own table primitive never got it.
+
+   The vertical padding is not cosmetic: `overflow-x: auto` computes
+   `overflow-y` to `auto` as well, and the global focus ring sits 4px OUTSIDE
+   its control (base.css `:focus-visible`), so without the slack the ring on
+   a button in the first or last row is shaved off by the scrollport edge.
+
+   A table whose cells hold no focusable control cannot be scrolled by
+   keyboard alone — those call sites carry `tabindex="0"` + `role="region"`
+   + a label so the scrollport is reachable (WCAG 2.1.1). */
+@media (max-width: 40rem) {
+  .tds-table {
+    display: block;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-block: 2px 6px;
+  }
+  /* Title and actions stack. `flex-wrap` alone did not save this: the toolbar
+     wraps its OWN buttons before it will move to a new line, so it stayed
+     beside the title and squeezed it to 113px — narrower than the word
+     "Dashboard", which then overflowed its box and ran under the buttons.
+     Side by side is not a sensible arrangement at this width anyway. */
+  .tds-page__head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* A caption is a block child of the now-block table, so it inherits the
+     SCROLL width — the explanatory sentence stretched to the full 540px of
+     columns and its right half sat off-screen until you scrolled the table.
+     Pinning it to the left of the scrollport and bounding it by the viewport
+     keeps it readable where it is. */
+  .tds-table > caption {
+    position: sticky;
+    left: 0;
+    max-width: calc(100vw - 3rem);
+  }
+}
+
+/* "Nothing here yet" state. Replaces one bespoke unstyled <p> per
+   screen. */
+.tds-empty {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  border: 1px dashed var(--color-line);
+  border-radius: var(--tds-radius-card);
+}
+
+/* === Page shell ===================================================
+   The centred page container. Before this, each app repeated a container
+   utility per call site — tds-blog-frontend had `max-w-5xl mx-auto px-6` in 22
+   files — so the page width was not a decision anywhere, it was 22 copies of
+   one, and none of them could be changed without changing all of them.
+
+   CASCADE TRAP, and it is not a specificity question: this stylesheet is
+   UNLAYERED, while Tailwind emits utilities inside `@layer utilities`, and
+   unlayered CSS beats every layer. So an element carrying both `tds-shell` and
+   a width utility takes the SHELL's width and the utility does nothing — which
+   means a half-migrated page looks fully migrated. To narrow one instance, set
+   the token (`style="--tds-shell-max: 48rem"`), never a utility class. */
+.tds-shell {
+  max-width: var(--tds-shell-max);
+  margin-inline: auto;
+  padding-inline: var(--tds-gutter);
+}
+.tds-shell--wide {
+  max-width: var(--tds-shell-wide);
+}
+
+/* === Intrinsic card grid ==========================================
+   A multi-column grid with NO breakpoint at any width: `auto-fill` derives the
+   column count from the space the grid actually gets, so it answers a wider
+   page, a collapsed sidebar or a narrower parent identically and without
+   either side knowing about the other.
+
+   `min(100%, …)` is the overflow guard, and it is not optional: a bare
+   `minmax(16rem, 1fr)` overflows any viewport narrower than 16rem, and
+   `body { overflow-x: hidden }` (base.css) CLIPS that rather than revealing
+   it — no scrollbar, no error, the content on the right simply is not there.
+
+   Set `--tds-grid-min` on the grid to change the density; never write a column
+   count, or the grid stops being intrinsic. Same shape as `.dashboard-grid`
+   in app.css, which predates this and stays where it is (panel-owned). */
+.tds-grid-auto {
+  display: grid;
+  gap: var(--tds-gutter);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--tds-grid-min)), 1fr));
+}
+
+/* === Generic layout ===============================================
+   Two shapes that recur constantly in the panel's component internals: form
+   bodies / detail regions (a vertical stack) and header rows / filter bars /
+   tab strips (a wrapping horizontal row). Before these, every extension
+   invented its own name for them — `kb__form`, `contact-detail__body`,
+   `project-card__head`, `chats__filters` — and none of those names had a rule
+   anywhere, so the regions collapsed to browser defaults.
+   Deliberately unopinionated: spacing only, no surface and no border, so they
+   compose inside `.tds-card` / `.tds-widget` / `.tds-page`. */
+
+/* Vertical stack — the workhorse: form bodies, detail panels, reply lists. */
+.tds-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.tds-stack--tight {
+  gap: 0.35rem;
+}
+.tds-stack--loose {
+  gap: 1.25rem;
+}
+
+/* Wrapping horizontal row: header rows (title + chips + actions), filter bars,
+   tab strips. `--between` pushes the trailing group to the far edge. */
+.tds-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.tds-row--between {
+  justify-content: space-between;
+}
+/* An expandable card header is a full-width <button> that must still read as a
+   header rather than a control. */
+button.tds-row {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: color var(--tds-dur-fast) var(--tds-ease-out);
+}
+/* It reads as a header, but it is a disclosure control and had no feedback
+   at all beyond the cursor — no hover, no transition, no focus treatment. */
+button.tds-row:hover {
+  color: var(--color-accent);
+}
+button.tds-row:focus-visible {
+  outline-offset: 2px;
+}

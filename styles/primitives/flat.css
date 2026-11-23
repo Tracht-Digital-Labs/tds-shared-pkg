@@ -1,0 +1,147 @@
+/* === The FLAT variant ==============================================
+   Fill counterparts for the primitives that a borderless surface would
+   otherwise erase. Switched on by `data-flat` on <html>, whose token half
+   lives in surfaces/panel.css — read the long note there first.
+
+   WHY THIS SECTION HAS TO EXIST. `--tds-border-hairline: 0` on its own does
+   not make a surface flat, it makes parts of it INVISIBLE. Four primitives
+   in primitives.css separate from their ground ONLY by their edge:
+
+     .field-boxed   fill is `--color-card` — the same fill as the `.tds-card`
+                    it usually sits inside, so a borderless boxed input in a
+                    card is a completely invisible input with its label
+                    colliding into its value.
+     .status-pill   transparent; the variants set `color` + `border-color` and
+                    no fill at all, so it degrades to bare small-caps text.
+     .chip--neutral transparent (the COLOURED chip variants already carry a
+                    12% wash of their own hue and survive borderless — they
+                    must be left alone here, see below).
+     .btn-ghost     transparent + `border-color`, i.e. a button that reads as
+                    plain text until it is hovered.
+
+   That is the documented trap in two directions at once — "a fill only
+   separates against a DIFFERENT ground", and "removing a border deletes
+   state wherever a coloured edge was the only cue". So each one trades its
+   edge for a fill; nothing is merely deleted.
+
+   TWO THINGS THAT LOOK RIGHT AND ARE NOT, both learned from the built CSS:
+
+   1. NOT `color-mix(in srgb, currentColor 12%, transparent)`, tempting as it
+      is (one rule would tint every variant in its own hue instead of eleven
+      hard-coded mixes). lightningcss cannot resolve a mix containing
+      `currentColor` at build time, so the legacy fallback it emits for the
+      pinned Safari floor is `background: currentColor` — a SOLID block of the
+      pill's own text colour, i.e. perfectly invisible text. A wash whose
+      operands are known tokens compiles to a real colour instead.
+   2. This block must not select the coloured variants at all.
+      `[data-flat] .chip` is (0,2,0) against `.chip--warning`'s (0,1,0), so a
+      blanket rule here silently overrides every variant's wash and renders
+      all of them in one grey. Hence the explicit list plus
+      `:not([class*="--"])` for the variant-less chip.
+
+   `.field` is deliberately absent — its `border-bottom` is a literal 1px
+   line BETWEEN two things, not a self-outline, so it never went through the
+   token and needs no counterpart.
+
+   Anything added to this section wants an assertion in design.test.ts: an
+   invisible input is silent in the browser, in `astro check` and in the
+   build, which is exactly how it would ship. */
+
+[data-flat] .status-pill,
+[data-flat] .chip--neutral,
+[data-flat] .chip:not(.chip-solid):not(.chip-active):not([aria-pressed="true"]):not([class*="--"]) {
+  background: color-mix(in srgb, var(--color-ink) 6%, var(--color-card));
+}
+/* `.chip-solid` is excluded because it already carries a solid primary fill
+   with its on-primary text; a wash over it would put that text on
+   near-white. `.chip-active` is excluded for the rule below: at (0,4,0) this
+   wash would paint straight over its fill. */
+
+/* THE SELECTED CHIP. `.chip-active` is the library's tab and filter state
+   (the tools' mode switches, the extensions' tab bars), and on an outlined
+   surface its accent EDGE is what says "selected". Flat, the edge is gone and
+   only the label's hue is left: on the tools site the selected and resting
+   labels measured 1.93:1 apart in light mode and 1.15:1 in dark, so the PDF
+   tool's three modes read as three identical buttons — a state carried by
+   colour alone (WCAG 1.4.1). It takes `.chip-solid`'s fill instead, which
+   makes it the one solid element in its row in both themes.
+
+   `.chip.chip-active`, not `.chip-active`: `button.chip:hover` is (0,2,1)
+   and would repaint the label in ink over the solid fill. */
+/* A pressed chip (`aria-pressed="true"`, the filter bar's choice) is the same
+   state and is excluded from the wash above for the same reason: at (0,6,0)
+   the wash painted over the filter bar's fill and left white on near-white. */
+[data-flat] .chip.chip-active,
+[data-flat] button.chip[aria-pressed="true"] {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* A CARD INSIDE A CARD. Not on the original list, and found only in a
+   browser: an output box nested in a form card carries the same
+   `--color-card` fill as its parent, so with the outline gone the two are
+   one white rectangle. The tools site has four (the QR preview, the contrast
+   sample, the generated password, the generated UTM link) and every one of
+   them is the RESULT the visitor came for — the thing they have to read and
+   copy, which is precisely the content the feedback rules say must stay
+   in-flow and legible.
+
+   Same wash as the other counterparts, so a nested card reads as a step off
+   its parent's ground rather than as a second unrelated fill. Only ONE level
+   is treated: a third nesting would keep this fill, and a stack that deep is
+   a layout problem, not a colour one. */
+[data-flat] .tds-card .tds-card {
+  background: color-mix(in srgb, var(--color-ink) 6%, var(--color-card));
+}
+[data-flat] .field-boxed {
+  background: color-mix(in srgb, var(--color-ink) 6%, var(--color-card));
+  /* THE FIELD'S EDGE (2026-11-10). The fill and the 2px inset alone measured
+     1.08:1 (fill) and 1.43:1 (inset edge) against the shop's paper, 1.37:1 in
+     dark — below WCAG 1.4.11's 3:1 for the boundary that says "type here",
+     so a checkout field read as a grey, possibly disabled patch. One line
+     along the bottom, as on a paper form, at ink 55 %: above 3:1 against the
+     paper and the fill in both themes. A width of its own, not the hairline
+     (0 on this surface); a consumer that sets `border-color` still hides it. */
+  border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 55%, transparent);
+}
+
+[data-flat] .btn-ghost {
+  background: var(--color-soft);
+}
+[data-flat] .btn-ghost:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-ink) 8%, var(--color-soft));
+}
+
+/* The header shell. `.brand-header` draws its own `border-bottom` with a
+   LITERAL 1px (see the note on that rule) rather than through the hairline
+   token, so a flat consumer keeps the line unless it is switched off here —
+   the site cannot do it without re-declaring a shared class.
+
+   The fill turns fully OPAQUE and the blur goes with it: a translucent bar
+   over a blurred page is a depth effect, and it is the one thing on a flat
+   page that reads as glass. `--color-card` rather than the panel canvas on
+   purpose — a canvas-coloured bar over a canvas-coloured page has no
+   boundary at all once the page scrolls under it, which is the same
+   different-ground rule as everything above. Because the fill is opaque, a
+   `-webkit-backdrop-filter` surviving from the base rule cannot show. */
+[data-flat] .brand-header {
+  background: var(--color-card);
+  backdrop-filter: none;
+  border-bottom: 0;
+}
+
+/* From 64rem the header is no bar at all, flat or not: the islands carry the
+   fill, the header only holds them in place while the page scrolls. After the
+   `[data-flat]` rule on purpose — same specificity, so the later one wins.
+   Space above instead of `top`, or the islands would jump down by the gap the
+   moment the page starts to scroll. */
+@media (min-width: 64rem) {
+  .brand-header,
+  [data-flat] .brand-header {
+    padding-block-start: 0.75rem;
+    background: transparent;
+    backdrop-filter: none;
+    border-bottom: 0;
+    pointer-events: none;
+  }
+}

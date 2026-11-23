@@ -1,0 +1,74 @@
+/* === Editorial typography ========================================= */
+
+/* The chapter mark. Bordeaux, not grey: "Kapitelmarken" is the brand
+   direction's first named role for it, and a numbered section heading is
+   exactly that. ~9:1 on paper. On the dark toned sections the apps override
+   this with a white utility, which still wins — the label follows its ground,
+   the rule below does not. */
+.section-num {
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+/* The 24px rule beside it is the brand direction's "kurze Linie in Ocker" —
+   the one place gold gets to appear outside pure decoration.
+
+   SOLID, and the dropped `opacity: 0.5` is the point: gold measures 3.49:1 on
+   paper and 4.52:1 on the navy of the dark sections, which clears the 3:1 a
+   graphic needs; at half opacity it lands near 1.8:1 and is a smudge. It is
+   also no longer `currentColor`, so it stays gold on the white-labelled dark
+   sections instead of turning white with the text. */
+.section-num::before {
+  content: "";
+  display: inline-block;
+  width: 1.5rem;
+  height: 1px;
+  background: var(--color-gold);
+}
+
+/* Drop-cap for the first paragraph of editorial pages */
+.drop-cap::first-letter {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 4.5rem;
+  line-height: 0.85;
+  float: left;
+  padding: 0.25rem 0.5rem 0 0;
+  color: var(--color-primary);
+}
+
+/* Marginalia: a side note pinned next to the main column. On narrow
+   screens it just stacks below as a muted block. */
+.marginalia {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+.marginalia strong {
+  color: var(--color-ink);
+  font-weight: 500;
+}
+
+/* === Rules / hairlines ============================================ */
+
+.hairline {
+  border: 1px solid var(--color-line);
+}
+.hairline-t {
+  border-top: 1px solid var(--color-line);
+}
+.hairline-b {
+  border-bottom: 1px solid var(--color-line);
+}
+.rule {
+  height: 1px;
+  background: var(--color-line);
+  border: 0;
+  margin: 2.5rem 0;
+}

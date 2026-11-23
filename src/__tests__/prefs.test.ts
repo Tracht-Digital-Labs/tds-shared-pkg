@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readStylesheet } from "./stylesheet";
 
 import {
   PREFS_CHANGE_EVENT,
@@ -137,14 +136,15 @@ describe("app shell", () => {
   });
 
   it("every bottom-fixed element adds the tab bar lane", () => {
-    const base = readFileSync(join(process.cwd(), "styles", "base.css"), "utf8");
-    for (const rule of base.match(/bottom:\s*calc\([^;]*--tds-bottom-lane[^;]*;/g) ?? []) {
+    const rules = readStylesheet("base.css").match(/bottom:\s*calc\([^;]*--tds-bottom-lane[^;]*;/g) ?? [];
+    expect(rules.length).toBeGreaterThan(0);
+    for (const rule of rules) {
       expect(rule).toContain("--tds-tabbar-lane");
     }
   });
 
   it("spells out the dialog position (Tailwind preflight resets margin)", () => {
-    const css = readFileSync(join(process.cwd(), "styles", "app-shell.css"), "utf8");
+    const css = readStylesheet("app-shell.css");
     const rule = css.match(/dialog\.tds-sheet\s*\{[^}]*\}/)?.[0] ?? "";
     expect(rule).toMatch(/margin:\s*0 auto/);
     expect(rule).toMatch(/inset:/);

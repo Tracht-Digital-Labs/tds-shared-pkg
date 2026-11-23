@@ -2,9 +2,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { FileDropZone, matchesAccept, partitionFiles } from "../dropzone";
+import { readStylesheet } from "./stylesheet";
 
 afterEach(cleanup);
 
@@ -156,9 +155,9 @@ describe("FileDropZone", () => {
 });
 
 describe(".tds-dropzone styles", () => {
-  const css = readFileSync(join(__dirname, "..", "..", "styles", "primitives.css"), "utf8");
-  // The drop zone block is the last section of the file, so its reduced-motion
-  // rule is the last one.
+  const css = readStylesheet("primitives.css");
+  // The drop zone is the last partial primitives.css imports, so its
+  // reduced-motion rule is the last one.
   const reduced = css.slice(css.lastIndexOf("@media (prefers-reduced-motion: reduce)"));
 
   it("styles every state the component sets", () => {

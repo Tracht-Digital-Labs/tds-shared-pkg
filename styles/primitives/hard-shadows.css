@@ -1,0 +1,88 @@
+/* === Hard 2D shadows (public surfaces 2026-09-22, panels 2026-10-06) ===
+
+   Every box and every control on the marketing, blog and panel surfaces
+   carries the fixed offset from base.css (`--tds-shadow-hard*`) — the panel
+   surface also renders the central login. Controls get the small offset and PRESS into it:
+   `translate` moves the control into its own shadow, which then shrinks —
+   `translate`, not `transform`, so Motion's transforms stay free. The
+   shadow itself never transitions (see the rule on transitions). The
+   hamburger (`.btn-ghost.tds-menu-toggle`) is an icon in a bar, not a button
+   on the page, and keeps none. */
+
+/* The dark tones re-declare the shadows: `var()` in a custom property is
+   resolved where it is declared, so a new ink alone would not reach them. */
+:is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"]) :is(.tds-tone-navy, .tds-tone-ink) {
+  --tds-shadow-ink: rgb(0 0 0 / 0.55);
+  --tds-shadow-hard: 6px 6px 0 0 var(--tds-shadow-ink);
+  --tds-shadow-hard-sm: 3px 3px 0 0 var(--tds-shadow-ink);
+  --tds-shadow-hard-press: 1px 1px 0 0 var(--tds-shadow-ink);
+  --tds-shadow-hard-hover: 8px 8px 0 0 var(--tds-shadow-ink);
+  --tds-shadow-hard-sm-hover: 5px 5px 0 0 var(--tds-shadow-ink);
+}
+
+/* NO NAVY SHADOW UNDER A NAVY FILL (2026-10-09). The ink is the brand navy
+   on paper, and a navy button over a navy offset — or a navy offset mixed from
+   its own fill, as the panel used to do — fuses into one slab that reads as a
+   thicker button rather than a lifted one. Every navy-filled control casts the
+   coral of the brand accent instead, on every surface and in both themes
+   (where the dark fills are light, coral still parts from them). The bordeaux
+   button keeps a shade of its own fill: red over dark red is two shapes.
+   Restated offsets for the same reason as the tones above. */
+:is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"])
+  :is(.btn-primary, .cookie-notice-btn:not(.cookie-notice-btn--ghost), .live-chat-cta__launcher) {
+  --tds-shadow-ink: var(--color-accent-pink);
+}
+:is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"]) .btn-accent {
+  --tds-shadow-ink: color-mix(in srgb, var(--color-accent) 45%, #000);
+}
+:is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"])
+  :is(.btn-primary, .btn-accent, .cookie-notice-btn:not(.cookie-notice-btn--ghost), .live-chat-cta__launcher) {
+  --tds-shadow-hard-sm: 3px 3px 0 0 var(--tds-shadow-ink);
+  --tds-shadow-hard-press: 1px 1px 0 0 var(--tds-shadow-ink);
+  --tds-shadow-hard-sm-hover: 5px 5px 0 0 var(--tds-shadow-ink);
+}
+
+:is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"])
+  :is(.tds-card, .tds-widget, .tds-modal__panel, .tds-product-card, .tds-dropdown__panel, .tds-mobile-menu, .tds-toast, .cookie-notice) {
+  box-shadow: var(--tds-shadow-hard);
+}
+
+:is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"])
+  :is(.btn-primary, .btn-accent, .btn-ghost, .btn-danger, .cookie-notice-btn, .live-chat-cta__launcher):not(.tds-menu-toggle) {
+  box-shadow: var(--tds-shadow-hard-sm);
+  transition-property: background-color, color, border-color, translate, opacity;
+}
+/* Hover and keyboard focus LIFT an interactive element toward the pointer:
+   2px up-left, and the offset grows by the same 2px. The translate
+   animates, the shadow simply switches (never in a transition). */
+:is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"])
+  :is(.btn-primary, .btn-accent, .btn-ghost, .btn-danger, .cookie-notice-btn, .live-chat-cta__launcher):not(.tds-menu-toggle):is(:hover, :focus-visible):not(:disabled) {
+  translate: -2px -2px;
+  box-shadow: var(--tds-shadow-hard-sm-hover);
+}
+:is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"]) .tds-product-card {
+  transition-property: background-color, translate;
+  transition-duration: var(--tds-dur-fast);
+}
+:is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"]) .tds-product-card:is(:hover, :focus-within) {
+  translate: -2px -2px;
+  box-shadow: var(--tds-shadow-hard-hover);
+}
+@media (prefers-reduced-motion: reduce) {
+  :is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"])
+    :is(.btn-primary, .btn-accent, .btn-ghost, .btn-danger, .cookie-notice-btn, .live-chat-cta__launcher):is(:hover, :focus-visible),
+  :is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"]) .tds-product-card:is(:hover, :focus-within) {
+    translate: none;
+  }
+}
+:is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"])
+  :is(.btn-primary, .btn-accent, .btn-ghost, .btn-danger, .cookie-notice-btn, .live-chat-cta__launcher):not(.tds-menu-toggle):active:not(:disabled) {
+  translate: 2px 2px;
+  box-shadow: var(--tds-shadow-hard-press);
+}
+@media (prefers-reduced-motion: reduce) {
+  :is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"])
+    :is(.btn-primary, .btn-accent, .btn-ghost, .btn-danger, .cookie-notice-btn, .live-chat-cta__launcher):not(.tds-menu-toggle):active:not(:disabled) {
+    translate: none;
+  }
+}

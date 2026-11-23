@@ -1,0 +1,205 @@
+/* === Form fields ================================================== */
+
+/* Editorial input: bare line, focus draws an accent underline.
+   NOTE this class is the INPUT ELEMENT. It is not a wrapper. The
+   landingpage's contact form has a wrapper div with its own baseline rule
+   and animated underline; that family is `.contact-field-row` /
+   `-line` / `-label` precisely so it does not collide with this. */
+.field {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-line);
+  padding: 0.625rem 0;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--color-ink);
+  transition: border-color var(--tds-dur-base) var(--tds-ease-out);
+}
+/* `:focus`, NOT `:focus-visible`, and deliberately WITHOUT `outline: none`.
+   This rule used to kill the outline — and because `.field:focus` is (0,2,0)
+   against the global `:focus-visible` at (0,1,0), it won: every text input in
+   the panel gave keyboard users a 1px border-colour change as its ONLY focus
+   indicator, which fails WCAG 2.4.11 and 1.4.11 on its own. The colour shift
+   is a nice supplementary cue for pointer users; it is not an indicator. */
+.field:focus {
+  border-bottom-color: var(--color-accent);
+}
+/* The underline field has no well to colour, so its line does the work: it
+   thickens to 2px in the focus colour, and the ring goes (base.css explains
+   why `transparent` and not `none`). */
+.field:focus-visible {
+  outline-color: transparent;
+  border-bottom-color: var(--tds-focus-ink, var(--color-accent));
+  box-shadow: inset 0 -1px 0 0 var(--tds-focus-ink, var(--color-accent));
+}
+.field::placeholder {
+  color: var(--color-muted);
+}
+
+.field-boxed {
+  width: 100%;
+  background: var(--color-card);
+  border: var(--tds-border-hairline) solid var(--color-line);
+  border-radius: var(--tds-radius-input);
+  padding: 0.625rem 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  /* PRESSED IN (2026-09-28). The inverse of the hard shadow that lifts a card
+     off the page: an unblurred inset offset from the top left, so a control
+     you reach INTO is told apart from a thing you pick up. On the marketing
+     and blog surfaces `--tds-border-hairline` is 0, which left a boxed field
+     as a bare fill with nothing to say where its edge was — this is now what
+     draws that edge. */
+  box-shadow: var(--tds-shadow-inset);
+  transition: border-color var(--tds-dur-base) var(--tds-ease-out);
+}
+/* No `.field-boxed:focus` border change (2026-10-09, asked for): a focused
+   field shows no frame at all — neither the ring nor a recoloured border.
+   Only the well changes colour (base.css), and that is the indicator. */
+
+/* === Checkbox and radio ============================================
+   Pressed into the page like every other control (2026-09-28), which
+   needs `appearance: none`: a native checkbox takes no background, no
+   border and no shadow, so without it every rule below is ignored and
+   nothing about the change is visible.
+
+   Element selectors on purpose. `scripts/lint-primitives.mjs` lists
+   checkbox and radio as the types that legitimately carry no class, so
+   they are bare in every consumer — a class here would reach none of
+   them. A component that styles its own box (the landingpage's round
+   consent checkbox) wins on specificity and is untouched.
+
+   `:where()` keeps this at zero specificity so a utility still applies. */
+:where(input[type="checkbox"], input[type="radio"]) {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-grid;
+  place-content: center;
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  /* A fixed 1px, NOT `--tds-border-hairline`: that is 0 on the public
+     surfaces, and a borderless empty checkbox is an invisible one. The
+     borderless rule is about cards, not about controls you have to find. */
+  border: 1px solid var(--color-line);
+  border-radius: var(--tds-radius-xs);
+  background: var(--color-card);
+  /* The FULL inset, not the `-sm` one a text field uses. Depth is read as a
+     proportion of the box, not in absolute pixels: 1px inside an 18px control
+     is 6% of its width and reads as a slightly dirty top edge, where the same
+     1px inside a 40px input reads as a well. 2px here matches what `-sm` does
+     there. Deepening `--tds-inset-ink` instead was the wrong knob — it would
+     have darkened every text field and select along with it. */
+  box-shadow: var(--tds-shadow-inset);
+  color: var(--color-on-primary);
+  cursor: pointer;
+  transition:
+    background-color var(--tds-dur-fast) var(--tds-ease-out),
+    border-color var(--tds-dur-fast) var(--tds-ease-out);
+}
+:where(input[type="radio"]) {
+  border-radius: 100px;
+}
+:where(input[type="checkbox"], input[type="radio"])::before {
+  content: "";
+  width: 0.625rem;
+  height: 0.625rem;
+  background: currentColor;
+  transform: scale(0);
+  transition: transform var(--tds-dur-fast) var(--tds-ease-out);
+}
+:where(input[type="checkbox"])::before {
+  /* A tick, drawn rather than typed: a glyph would depend on a font the
+     surface may not load, and would sit on the text baseline. */
+  clip-path: polygon(14% 52%, 38% 76%, 86% 22%, 96% 34%, 40% 94%, 4% 62%);
+}
+:where(input[type="radio"])::before {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 100px;
+}
+:where(input[type="checkbox"], input[type="radio"]):checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  /* Filled, so it is no longer a well to reach into. */
+  box-shadow: none;
+}
+:where(input[type="checkbox"], input[type="radio"]):checked::before {
+  transform: scale(1);
+}
+:where(input[type="checkbox"], input[type="radio"]):disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(input[type="checkbox"], input[type="radio"]),
+  :where(input[type="checkbox"], input[type="radio"])::before {
+    transition: none;
+  }
+}
+
+/* Label + control stacked as one row. Replaces the ad-hoc
+   `flex flex-col gap-1` + bespoke `*-form__field` shells that every
+   panel island hand-rolled.
+   Two shapes are supported, because both occur in the codebase:
+     <div class="tds-field-row"><label>…</label><input></div>
+     <label class="tds-field-row">Titel<input></label>
+   In the second the label IS the row and its caption is a bare text node,
+   which cannot be selected — so the caption styling goes on the element and
+   the nested control resets it. */
+.tds-field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.tds-field-row > label,
+.tds-field-row > .tds-field-row__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  transition: color var(--tds-dur-fast) var(--tds-ease-out);
+}
+/* Lift the caption out of muted while its control has focus, so the row a
+   keyboard user is editing is identifiable from the label as well as from
+   the field's own ring. */
+.tds-field-row:focus-within > label,
+.tds-field-row:focus-within > .tds-field-row__label {
+  color: var(--color-ink);
+}
+label.tds-field-row {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+label.tds-field-row > :is(input, select, textarea) {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--color-ink);
+}
+
+/* A label + switch/checkbox row, e.g. the per-event notification toggles.
+   Wraps because the "label" side is not always one short string: the deploy
+   settings put a second labelled input opposite the first, which on a phone
+   is two form blocks fighting over 327px. */
+.tds-toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-line);
+  transition: color var(--tds-dur-fast) var(--tds-ease-out);
+}
+.tds-toggle-row:last-child {
+  border-bottom: 0;
+}
+/* The control here is a bare checkbox, whose focus ring is small and easy to
+   lose against a list of a dozen identical rows. */
+.tds-toggle-row:focus-within {
+  color: var(--color-ink);
+}

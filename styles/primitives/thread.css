@@ -1,0 +1,44 @@
+/* === Message thread =============================================== */
+
+/* Side-aligned message bubbles. The support-ticket thread and the live
+   chat widget are the same design problem; the widget's private
+   `.live-chat-cta__msg--visitor/--agent` came first, this is the shared
+   version. `--own` is the current user's side (right), `--other` the
+   counterpart's (left). */
+.tds-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.tds-thread__item {
+  max-width: min(90%, 40rem);
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--tds-radius-card);
+  border: var(--tds-border-hairline) solid var(--color-line);
+  background: var(--color-card);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  /* People paste URLs into tickets. `max-width` caps the bubble but cannot
+     break a single unbroken token, so without this the link runs straight
+     out of the bubble and off the phone. The widget's own bubble
+     (`.live-chat-cta__msg`, base.css) has always had this; the shared
+     version it was generalised into did not. */
+  overflow-wrap: anywhere;
+}
+.tds-thread__item--own {
+  align-self: flex-end;
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-card));
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-line));
+}
+.tds-thread__item--other {
+  align-self: flex-start;
+}
+.tds-thread__author {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 0.25rem;
+}

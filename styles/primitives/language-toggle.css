@@ -1,0 +1,81 @@
+/* ---- Language toggle ------------------------------------------------------
+   The DE|EN segmented switch. Promoted out of tds-blog-frontend in 0.25.3 so
+   the blog and the tools site carry ONE control instead of two copies — the
+   tools site had a single text link, which reads as a nav item rather than as
+   a switch and never shows which language you are currently on.
+
+   It is a group of LINKS, not buttons: each half is a real URL to the same
+   page in the other language, so it works without JS, can be opened in a new
+   tab and is crawlable. `aria-current="true"` on the active half is what
+   carries the state to assistive tech — `.on` is only paint.
+
+   The active half uses `--color-surface-navy`, a FIXED-dark token, so the
+   white text on it survives both themes. A flipping token here would put
+   white on near-white in dark mode.
+
+   Consumers wrap it in `role="group"` with a bilingual `aria-label`
+   ("Sprache / Language"), since the control names languages in their own
+   tongue and a single-language label would be wrong for half its users. */
+.tds-lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  background: var(--color-soft);
+  border-radius: var(--tds-radius-chip, 0);
+}
+.tds-lang-toggle a {
+  display: inline-flex;
+  align-items: center;
+  height: 1.625rem;
+  padding: 0 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  text-decoration: none;
+  border-radius: var(--tds-radius-chip, 0);
+  transition:
+    background-color var(--tds-dur-base) var(--tds-ease-out),
+    color var(--tds-dur-base) var(--tds-ease-out);
+}
+.tds-lang-toggle a:hover,
+.tds-lang-toggle a:focus-visible {
+  color: var(--color-ink);
+}
+.tds-lang-toggle a.on {
+  background: var(--color-surface-navy);
+  color: #fff;
+}
+/* Phones: trim the control so a top bar holding wordmark + language + theme +
+   hamburger fits without horizontal overflow. `body { overflow-x: hidden }`
+   CLIPS that overflow rather than revealing it, so the symptom would be a
+   hamburger simply missing off the right edge, with nothing in the console.
+
+   Trimmed, but never below WCAG 2.2's 24px target floor (2.5.8): the shop's
+   mobile audit measured the trimmed link at 29x23px. The floor is written in
+   px on purpose — it is a size for a finger, not a step on the type scale. */
+@media (max-width: 39.9375rem) {
+  .tds-lang-toggle a {
+    height: 1.5rem;
+    min-height: 24px;
+    padding: 0 0.5rem;
+    font-size: 0.625rem;
+  }
+}
+/* Inside the mobile sheet there is no crowded bar to fit, so the switch gets a
+   finger-sized target. The journal, the tools site and the shop all place the
+   switch in `.tds-mobile-menu`; the shop had grown a local copy of exactly this
+   rule, which is how it arrived here. Two classes, so it outranks the phone
+   trim above at any width. */
+.tds-mobile-menu .tds-lang-toggle a {
+  height: 2.75rem;
+  padding-inline: 1rem;
+  font-size: 0.8125rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Reset the end state rather than only shortening it — a colour transition
+     that still runs at 0.01ms is still motion. */
+  .tds-lang-toggle a {
+    transition: none;
+  }
+}

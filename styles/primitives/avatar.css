@@ -1,0 +1,58 @@
+/* === Avatar ========================================================
+   The one place a person is represented as a person. Used by the frontend
+   host's profile menu and profile page, and available to any list that
+   shows a user.
+
+   Colour for the initials fallback comes from the CATEGORICAL palette via
+   `data-avatar-variant`, written by components/Avatar.tsx from a stable
+   hash of the user id — so one person keeps one tint across the menu, the
+   profile page and a user table. Same ink/tint idea as `.chip--cat-*`
+   above, deliberately: those hues are tuned for dark text on a light
+   canvas and flip in dark mode, so a mix against `--color-card` tracks the
+   theme in both directions without a second rule. */
+.tds-avatar {
+  --tds-avatar-size: 2.25rem;
+  --tds-avatar-hue: var(--color-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--tds-avatar-size);
+  height: var(--tds-avatar-size);
+  border-radius: var(--tds-radius-pill);
+  overflow: hidden;
+  /* An <img> and the initials <span> must be the same circle. Without this
+     an image whose aspect ratio is not 1:1 stretches instead of cropping,
+     which is what a portrait upload usually is. */
+  object-fit: cover;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: calc(var(--tds-avatar-size) * 0.4);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  user-select: none;
+  color: var(--tds-avatar-hue);
+  background: color-mix(in srgb, var(--tds-avatar-hue) 14%, var(--color-card));
+  border: 1px solid color-mix(in srgb, var(--tds-avatar-hue) 30%, transparent);
+}
+.tds-avatar--sm {
+  --tds-avatar-size: 1.75rem;
+}
+.tds-avatar--lg {
+  --tds-avatar-size: 4.5rem;
+}
+.tds-avatar[data-avatar-variant="cat-violet"] {
+  --tds-avatar-hue: var(--color-cat-violet);
+}
+.tds-avatar[data-avatar-variant="cat-teal"] {
+  --tds-avatar-hue: var(--color-cat-teal);
+}
+.tds-avatar[data-avatar-variant="cat-amber"] {
+  --tds-avatar-hue: var(--color-cat-amber);
+}
+.tds-avatar[data-avatar-variant="cat-rose"] {
+  --tds-avatar-hue: var(--color-cat-rose);
+}
+.tds-avatar[data-avatar-variant="cat-cyan"] {
+  --tds-avatar-hue: var(--color-cat-cyan);
+}

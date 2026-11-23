@@ -1,0 +1,64 @@
+/* === Touch / small-screen ergonomics ============================== */
+
+/* On touch devices give the interactive chrome a comfortable hit area
+   (~44px, the platform minimum) and bump text inputs to 16px so iOS
+   Safari doesn't auto-zoom the page when a field is focused. Scoped to
+   `pointer: coarse` so the tighter desktop sizing is unchanged, and to
+   the interactive primitives only (badges like .chip / .status-pill stay
+   compact — they're labels, not tap targets). The `.nav-item` rule lives
+   in app.css alongside the rest of the sidebar chrome. */
+@media (pointer: coarse) {
+  /* The avatar trigger in the shell's top bar. `.tds-dropdown__item` is
+     already 44px at every pointer type (it is a menu row, not a badge), so
+     only the trigger needs lifting here. */
+  .tds-dropdown__trigger {
+    min-height: 44px;
+  }
+  .btn {
+    min-height: 44px;
+  }
+  .field,
+  .field-boxed {
+    font-size: 16px;
+    min-height: 44px;
+  }
+  /* A chip rendered as a button or a link is a CONTROL, not a label — it is
+     how the library builds filter strips and tab bars (see the note above
+     `button.chip`). Those were left at the label's ~22px because the
+     exclusion was written for the badge case, which is still correct: a
+     status pill is read, not tapped, and growing it would just bloat every
+     table row. Same selector pair the file already uses for the interactive
+     treatment, so the two never drift apart. */
+  button.chip,
+  a.chip {
+    min-height: 44px;
+    padding-inline: 0.875rem;
+  }
+
+  /* A product card's headline is a LINK, and it was a 21px-high one: the line
+     box and nothing more. Measured at 390px on the shop, where it is often the
+     only way into the product. WCAG 2.2's 24px floor has an exception for a
+     link inline in a sentence — a card headline is not that, it is a
+     standalone target.
+     `inline-block` so the padding actually grows the hit area; on an inline
+     element vertical padding paints but does not affect layout or hit
+     testing. */
+  .tds-product-card__title {
+    display: inline-block;
+    min-height: 44px;
+    padding-block: 0.5rem;
+  }
+
+  /* The merchant CTA already carries `.btn`, which is lifted above. The
+     offer row itself gains breathing space so two stacked offers are not
+     two 44px targets sharing an edge. */
+  .tds-product-offer,
+  .tds-product-offer__actions {
+    row-gap: 0.75rem;
+  }
+  .tds-product-offer__direct {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}

@@ -1,0 +1,246 @@
+/* === Colour and font tokens, light and dark ============================ */
+
+@theme inline {
+  /* Light theme — the default. The dark overrides below
+     (`:root[data-theme="dark"]`) flip the structural tokens
+     (paper / soft / line / muted / black / ink) but keep the brand
+     accents (primary navy, burgundy accent, pink accent) since they
+     read on both backgrounds. */
+  --color-primary: #050f68;
+  --color-accent: #820933;
+  /* Text on a SOLID primary or accent fill (`.btn-primary`, `.btn-accent`,
+     `.chip-solid`, the selected flat chip). White here; the dark block
+     turns it into the dark ground, because both fills flip to pastels
+     there and white on them measured 2.28:1 (primary) and 2.15:1 (accent)
+     on the tools site's header CTA. */
+  --color-on-primary: #ffffff;
+  --color-on-accent: #ffffff;
+  --color-paper: #fafaf7;
+  /* Warmed one step (#e8e6df → #e3e0d8) with the "Digitale Maßarbeit"
+     pass: hairlines are the single most repeated surface in the library
+     (every card, table row, field and list separator), so a border that
+     reads grey is what made a warm-white page still feel like a cold SaaS
+     sheet. Contrast against paper is unchanged for practical purposes —
+     a 1px line is a graphic, and it sits at 1.10:1 either way, i.e. it is
+     a separator, never an information carrier. */
+  --color-line: #e3e0d8;
+  --color-muted: #6b6b66;
+  --color-soft: #f1efe8;
+  --color-accent-pink: #ff7a9c;
+  --color-black: #0b0a07;
+  --color-ink: #1a1a17;
+
+  /* Fixed brand surfaces — these stay dark in BOTH themes. The
+     structural tokens above flip in dark mode (so primary/black read as
+     foreground accents on a dark page), which would invert any section
+     that uses them as a *fixed dark backdrop*. These surface tokens give
+     those blocks (contact, footer, gradient cards, primary buttons) a
+     backdrop that never inverts. */
+  --color-surface-navy: #050f68;
+  --color-surface-accent: #820933;
+  --color-surface-ink: #0b0a07;
+  /* Elevated card / glass surface — flips with the theme. Translucent
+     glass references it through color-mix() so the light appearance is
+     unchanged while dark mode gets a dark glass instead of white. */
+  --color-card: #ffffff;
+
+  /* === Semantic status palette ====================================
+     Operational state colours for the dashboard frontends (admin /
+     customer): success (paid/delivered/healthy), warning (open/pending),
+     danger (overdue/error), info (active/in-progress). Each carries a
+     brighter dark value below so it reads on the navy ground. These
+     used to be duplicated in each app's global.css — they live here now
+     so admin + customer share one source of truth.
+     TINT CONVENTION (use these everywhere, never bespoke alpha):
+       border : color-mix(in srgb, <token> 45%, transparent)
+       wash   : color-mix(in srgb, <token> 12%, transparent)
+       text   : the raw <token>
+       tile bg: color-mix(in srgb, <token>  9%, var(--color-card))
+       tile br: color-mix(in srgb, <token> 35%, var(--color-line))
+     The washes are decorative (border + text carry the meaning), so they
+     need not meet contrast; the raw tokens are AA as text on paper/card. */
+  --color-success: #2f7d51;
+  --color-warning: #b9791c;
+  --color-danger: #b3261e;
+  --color-info: #2f5fb0;
+  /* TEXT on a success/warning wash. The claim above ("the raw tokens are AA as
+     text") holds on bare paper for success but not on its own 12% wash, and
+     for warning not even on paper: the API reference's GET and PUT chips
+     measured 4.29:1 and 3.16:1, and so did every "Noch nicht angeschlossen"
+     alert. Neither hue can simply darken — `--color-gold` aliases the warning
+     hue and must stay a 3:1 rule on navy — so chips, status pills and alerts
+     take their label colour from these darker twins and keep the base hue for
+     edge and wash. Danger and info already clear 5:1 on their washes. */
+  --color-success-ink: #256740;
+  --color-warning-ink: #855714;
+
+  /* === Categorical / wayfinding hues ==============================
+     A distinct (non-semantic) set for category coding and nav
+     wayfinding — blog categories, project types, time-tracking project
+     chips, per-section header accents. Spaced around the wheel and tuned
+     to sit with the navy primary + burgundy accent; brighter in dark. */
+  --color-cat-violet: #5b3fb0;
+  --color-cat-teal: #0f766e;
+  --color-cat-amber: #a85d12;
+  --color-cat-rose: #a4153f;
+  --color-cat-cyan: #1f6f8b;
+
+  /* === Management accent ==========================================
+     The admin frontend's accent axis (`--tds-panel-accent` under
+     `[data-frontend="admin"]`). It is the brand burgundy in light mode —
+     deliberately the same value as `--color-accent`, because the point is
+     that the management surface reads in the brand's OTHER colour, not in
+     a new one.
+
+     It is a token of its own rather than `var(--color-accent)` because of
+     the dark twin: `--color-accent` flips to #ff8fab, which is the exact
+     value of `--color-cat-rose`, and the accent doubles as the Verwaltung
+     zone's `--nav-hue` — two rail zones on one hex is precisely the
+     wayfinding collision the categorical set exists to avoid. The dark
+     value below is a crimson that stays clearly red (ΔE 24 from
+     `--color-cat-rose`, 21 from `--color-danger`) while still lifting far
+     enough off the rail to clear AA (see the nav-rail contrast tests).
+
+     Like every accent that doubles as nav ink it must FLIP light in dark
+     mode: the rail is dark in both themes, so a deep burgundy there would
+     be unreadable no matter how the rail is mixed. */
+  --color-management: #820933;
+
+  /* === Type families ==============================================
+     Canonical as of the design-library unification: Lato display,
+     Plus Jakarta Sans body, JetBrains Mono mono. This is what the blog
+     and the panel already shipped (2 of 3 surfaces); the landingpage was
+     the outlier on Geist, and its `--font-mono` resolved to nothing at
+     all because `@fontsource-variable/geist` is sans-only and Geist Mono
+     was never installed.
+     Every consuming app must install + JS-import the matching Fontsource
+     packages in its Layout.astro:
+       @fontsource/lato/{400,700,900}.css
+       @fontsource-variable/plus-jakarta-sans
+       @fontsource-variable/jetbrains-mono
+     Do NOT re-declare these in an app's global.css — that is exactly the
+     duplication this library exists to remove. */
+  --font-display: "Lato", "Helvetica Neue", Arial, sans-serif;
+  --font-body:
+    "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "Helvetica Neue", Arial,
+    sans-serif;
+  --font-mono:
+    "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SF Mono", Menlo,
+    monospace;
+}
+
+/* Dark theme. Activated when html carries `data-theme="dark"` (set by
+   the inline no-flash script in each app's Layout from the localStorage
+   `tds-theme` preference or the OS `prefers-color-scheme` fallback).
+
+   Re-themed (0.6.0): a deeper, more premium ink-navy. The ground drops to
+   a near-black blue (#070a14) so elevated surfaces read with real lift,
+   and the elevation ladder (paper < surface-ink < soft < card) gets a
+   clearer step between each rung. Brand accents are nudged a touch
+   brighter/cleaner and `--color-muted` is lifted to ~0.70 so secondary
+   text clears AA on the darker ground. Still one navy family — the panels,
+   periwinkle primary and pink accent all belong together; text stays warm
+   ivory for a deliberate warm-on-cool editorial contrast.
+
+   ### Why a SUBTREE selector sits beside the `:root` one (2026-09-30)
+
+   `[data-theme="dark"]` on its own was added so a REGION of a light page can be
+   rendered in the dark theme. The one caller is `ThemeToggle`'s hover preview: it
+   clones the page into an overlay, marks the clone dark and masks it to a circle
+   at the cursor, so the region shows the real dark theme rather than a dark sheet
+   laid over the light one.
+
+   Both selectors, not one. `:root[…]` is (0,2,0) and the bare attribute (0,1,0),
+   and the bare one only has to out-rank the `@theme inline` block's `:root` —
+   also (0,1,0) — which it does on source order, being ~140 lines later. Dropping
+   the `:root` form would still work for `<html>`, but it would quietly lower the
+   specificity that every consumer's own `:global(:root[data-theme="dark"])`
+   override is written against.
+
+   What it does NOT reach: Tailwind utilities. The colour block above is `@theme
+   inline`, so `text-muted` compiles with the literal hex substituted and no
+   cascade can touch it — the note at the surface scale below spells this out. An
+   arbitrary value (`text-[var(--color-ink)]`, which is what these repos use)
+   compiles to `color: var(--color-ink)` and does follow a subtree override. That
+   is why the preview reads as the dark theme rather than as a pixel-perfect copy
+   of it. */
+:root[data-theme="dark"],
+[data-theme="dark"] {
+  /* Black disappears on this ground; the hard shadow is a periwinkle
+     offset instead, still one navy family. */
+  --tds-shadow-ink: rgb(147 167 255 / 0.32);
+  /* And the pressed-in inset goes the other way for the same reason: a
+     dark inset inside an already dark field is no depth at all, so the
+     "shadow" on this theme is the light the control is sunk away from. */
+  --tds-inset-ink: rgb(0 0 0 / 0.38);
+  --color-primary: #93a7ff;
+  --color-accent: #ff8fab;
+  /* Both fills are light pastels in this theme, so the text on them is the
+     dark ground: 8.7:1 on the primary and 9.2:1 on the accent, where the
+     white they used to carry measured 2.28:1 and 2.15:1. */
+  --color-on-primary: #070a14;
+  --color-on-accent: #070a14;
+  /* Deep ink-navy ground (not a warm/neutral black) so the whole dark UI
+     is built from the brand navy. */
+  --color-paper: #070a14;
+  --color-soft: #10162a;
+  --color-line: rgb(255 255 255 / 0.12);
+  --color-muted: rgb(255 255 255 / 0.70);
+  --color-accent-pink: #ffa6c0;
+  --color-black: #f7f6f2;
+  --color-ink: #ebe9e1;
+
+  /* Brand surfaces + elevation ladder, all in the navy family
+     (paper < surface-ink < soft < card). The brand navy/burgundy are
+     lifted from their light values so panels, buttons and gradient cards
+     keep presence on the darker ground instead of sinking into it; the
+     ink/card neutrals are navy-tinted elevations, never a foreign warm
+     or grey dark. */
+  --color-surface-ink: #0c1120;
+  --color-card: #161d33;
+  --color-surface-navy: #1d2e72;
+  --color-surface-accent: #b01a46;
+
+  /* Status + categorical hues, brightened so they read as text/borders on
+     the deep ink-navy ground (paper #070a14, card #161d33). */
+  --color-success: #5fd394;
+  --color-warning: #e9b455;
+  --color-danger: #ff7a6e;
+  --color-info: #84a8ff;
+  /* The light block's text twins. On a dark wash the brightened hues already
+     read at 7:1 and more, so the twins are the hues themselves. */
+  --color-success-ink: #5fd394;
+  --color-warning-ink: #e9b455;
+
+  --color-cat-violet: #b39bff;
+  --color-cat-teal: #5eead4;
+  --color-cat-amber: #f3bd6e;
+  --color-cat-rose: #ff8fab;
+  --color-cat-cyan: #6fcfe8;
+
+  /* Management accent — see the light block. NOT `--color-accent`'s
+     #ff8fab, which is byte-identical to `--color-cat-rose` above. */
+  --color-management: #e8536f;
+
+  /* Decoration in dark mode. The triplets lift to the dark twins of the
+     four brand hues (a #050f68 field over a #070a14 ground is invisible),
+     and the field strength drops: the same alpha that reads as a soft
+     wash on warm white reads as a glow on a dark ground, and a glow is
+     exactly the "kalte Tech-Optik" this pass exists to remove.
+
+     Declared here rather than in a second plain `:root` because
+     `:root[data-theme="dark"]` out-specifies `:root` regardless of
+     source order — this block sits ABOVE the geometry scale in the file
+     and still wins. */
+  --tds-decor-navy: 147 167 255;
+  --tds-decor-bordeaux: 255 143 171;
+  --tds-decor-coral: 255 166 192;
+  --tds-decor-gold: 233 180 85;
+  --tds-decor-field-strength: 0.55;
+  --tds-decor-line-opacity: 0.24;
+  --tds-decor-shape-alpha: 0.075;
+
+  /* A light hue carries further on a dark ground, so the hover wash is dialled
+     back rather than kept at the light value. */
+  --tds-hover-wash: color-mix(in srgb, var(--color-accent-pink) 10%, transparent);
+}

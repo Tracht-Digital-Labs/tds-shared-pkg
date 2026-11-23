@@ -1,0 +1,40 @@
+/* === Skip link ====================================================
+   The first focusable element on the page. Off-screen until focused,
+   then pinned to the top-left.
+
+   NOT a React island: it has to be reachable on the very first Tab,
+   and an island mounted `client:idle` hydrates after that. Each layout
+   writes the two lines of markup itself and takes the string from
+   `translations[lang].a11y.skipToContent`:
+
+     <a class="tds-skip-link" href="#main">{t.a11y.skipToContent}</a>
+     …
+     <main id="main" tabindex="-1">
+
+   `tabindex="-1"` on the target is what makes the jump actually MOVE
+   focus rather than only scroll — without it, the next Tab continues
+   from the skip link and the whole header is still in the way, which
+   is the failure mode that makes skip links look implemented and not
+   be. */
+.tds-skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  padding: 0.625rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--color-surface-navy);
+  color: #fff;
+  border-radius: 0 0 var(--tds-radius-btn) 0;
+  /* Moved out of view rather than hidden: `display: none` and
+     `visibility: hidden` both make it unfocusable, and a skip link that
+     cannot take focus is not a skip link. */
+  transform: translateY(-120%);
+  transition: transform var(--tds-dur-fast) var(--tds-ease-out);
+}
+.tds-skip-link:focus-visible,
+.tds-skip-link:focus {
+  transform: translateY(0);
+}

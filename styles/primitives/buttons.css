@@ -1,0 +1,118 @@
+/* === Buttons ====================================================== */
+
+/* Geometry lives on `.btn`; colour lives on the `.btn-*` variant. BOTH
+   are required — `class="btn btn-primary"`.
+   A variant on its own is a navy rectangle with no padding, no radius and
+   no `:disabled` treatment, and it also misses the 44px touch floor from
+   the coarse-pointer block in primitives/touch.css. That mistake was
+   shipped on the central login for a while, so it is worth stating twice:
+   never write `class="btn-primary"` alone. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.125rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: var(--tds-radius-btn);
+  border: var(--tds-border-hairline) solid transparent;
+  cursor: pointer;
+  /* Only the two compositor-friendly properties live here, because they are
+     the only ones the SOLID variants change. `.btn` used to transition
+     background-color and color too, which is wasted work on every
+     `.btn-primary` / `.btn-accent` — by far the most-used variants. The
+     variants that actually recolour on hover declare their own transition. */
+  transition:
+    opacity var(--tds-dur-base) var(--tds-ease-out),
+    transform var(--tds-dur-base) var(--tds-ease-out);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* A DISABLED BUTTON STILL HAS TO BE READ (2026-11-10). Half opacity over a
+   filled button measured 2.03:1 for the label in light and 1.87:1 in dark on
+   the shop's checkout — whose disabled button carries the § 312j wording
+   "Zahlungspflichtig bestellen" the visitor must read before ticking the box
+   that enables it. On the public surfaces a disabled button is therefore a
+   flat grey slab with a readable label and no offset (nothing to press), not a
+   faded copy of the live one. Busy is excluded: it is the active control and
+   keeps its own look. The panels keep the opacity. */
+:is([data-surface="marketing"], [data-surface="blog"]) .btn:disabled:not([aria-busy="true"]) {
+  opacity: 1;
+  background: color-mix(in srgb, var(--color-ink) 10%, var(--color-paper));
+  border-color: transparent;
+  color: color-mix(in srgb, var(--color-ink) 70%, var(--color-paper));
+  box-shadow: none;
+  translate: none;
+}
+/* In-flight state. Every island was inventing its own — a label swap
+   ("Speichern …"), a bespoke inline SVG, or nothing at all — because the
+   library offered only `:disabled`'s flat 50% opacity, which is
+   indistinguishable from "not available yet". Mark the button
+   `aria-busy="true"` (and keep it `disabled`) and render a
+   `<Spinner size="sm" />` inside it; this rule handles the rest.
+   `cursor: progress` is the affordance difference from `:disabled`. */
+.btn[aria-busy="true"] {
+  cursor: progress;
+  /* Hold the resting opacity: a busy button is still the active control, so
+     it should not read as greyed out the way a disabled one does. */
+  opacity: 0.75;
+}
+.btn[aria-busy="true"]:hover {
+  transform: none;
+}
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+.btn-accent {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+.btn-accent:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+/* The two outline variants recolour on hover instead of lifting, so they —
+   and only they — pay for a background transition. */
+.btn-ghost,
+.btn-danger {
+  transition:
+    opacity var(--tds-dur-base) var(--tds-ease-out),
+    transform var(--tds-dur-base) var(--tds-ease-out),
+    background-color var(--tds-dur-base) var(--tds-ease-out);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-line);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--color-soft);
+}
+/* Destructive action. Stays in the `.btn-*` family rather than becoming
+   `.tds-btn--danger`, so the required `.btn` + variant pairing above holds
+   for every variant without exception. Replaces the bare `.danger` class
+   the panel referenced in 5 places and never defined. */
+.btn-danger {
+  background: transparent;
+  color: var(--color-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
+}
+.btn-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+}
+/* Press feedback. After the variants on purpose: at equal specificity this
+   has to win over the hover lift, or a pressed primary button would still be
+   floating 1px up. It rides the transform transition `.btn` already has, at
+   the fast end of the scale — a press answered at `--tds-dur-base` feels late.
+   Reduced motion resets it in base.css, like the hover lift. */
+.btn:active:not(:disabled):not([aria-busy="true"]) {
+  transform: scale(0.98);
+  transition-duration: var(--tds-dur-fast);
+}

@@ -9,6 +9,7 @@ styles/                    design-system CSS, shipped as-is (not built)
 ├── prose.css              .tds-prose long-form typography
 ├── app.css                panel/dashboard chrome (imports primitives)
 ├── app-shell.css          phone app shell (opt-in)
+├── {base,primitives,app,app-shell}/   the partials those four entries import, one per concern
 ├── page-transitions.css   cross-document page fades
 └── surfaces/{marketing,blog,panel}.css   geometry tokens only
 src/

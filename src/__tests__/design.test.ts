@@ -10,6 +10,7 @@ import {
   isKnownChipColor,
   resolveChipVariant,
 } from "../design";
+import { readStylesheet as read } from "./stylesheet";
 
 /**
  * Guards the design library's structural contracts. Every failure mode
@@ -18,9 +19,6 @@ import {
  * renders a pill with no colour. None of it throws, so nothing else would
  * catch it.
  */
-
-const STYLES = join(__dirname, "..", "..", "styles");
-const read = (p: string) => readFileSync(join(STYLES, p), "utf8");
 
 /** Strip CSS comments so prose in a docblock never counts as a match. */
 const stripComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, "");

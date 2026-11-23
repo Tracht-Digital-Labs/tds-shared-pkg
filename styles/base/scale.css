@@ -1,0 +1,355 @@
+/* =====================================================================
+   SURFACE TOKEN SCALE — geometry, elevation, motion, display type.
+
+   WHY A PLAIN `:root` AND NOT `@theme inline`:
+   the colour/font block (base/colors.css) is `@theme inline`, which makes Tailwind
+   substitute each token's *literal value* into the generated utilities.
+   That is what we want for colours (`text-primary` etc.), but it means an
+   `@theme inline` token can never be overridden further down the cascade
+   — a `[data-surface]` override would simply never be seen. The geometry
+   scale is consumed by this library's own CSS through `var()`, so it lives
+   in an ordinary `:root` block where the surface layers CAN override it.
+   Do not move these into the `@theme inline` block.
+
+   THE DEFAULTS BELOW ARE TODAY'S LITERALS, on purpose. A surface that has
+   not yet opted into a surfaces/*.css layer renders byte-identically to
+   before this refactor. All three variations' character lives exclusively
+   in surfaces/{marketing,blog,panel}.css. Adding a token here therefore
+   never changes an existing surface; forgetting to override it in a
+   surface layer just means "inherit the neutral default".
+   ===================================================================== */
+:root {
+  /* --- Radius scale ------------------------------------------------- */
+  --tds-radius-none: 0;
+  --tds-radius-xs: 2px;
+  --tds-radius-sm: 4px;
+  --tds-radius-md: 8px;
+  --tds-radius-lg: 12px;
+  --tds-radius-xl: 16px;
+  --tds-radius-2xl: 24px;
+  --tds-radius-pill: 999px;
+
+  /* --- Component geometry — what the surface layers actually flip ---
+     Each maps to a literal that app.css hard-coded before the split, so
+     the unmigrated default is a no-op. */
+  --tds-radius-btn: var(--tds-radius-pill); /* .btn            was 999px   */
+  --tds-radius-chip: var(--tds-radius-pill); /* .chip           was 999px   */
+  --tds-radius-badge: 0.75rem; /* .status-pill    was 0.75rem */
+  --tds-radius-input: var(--tds-radius-xs); /* .field-boxed    was 2px     */
+  --tds-radius-card: 0.75rem; /* .stat-tile      was 0.75rem */
+  --tds-radius-alert: 0.5rem; /* .form-alert     was 0.5rem  */
+  --tds-radius-bar: var(--tds-radius-xs); /* .tds-menu-bar   was 2px     */
+
+  /* --- Outline width -------------------------------------------------
+     The width of the 1px hairline that primitives draw AROUND themselves
+     — cards, widgets, chips, status pills, boxed fields, buttons. A
+     surface sets this to `0` to become borderless, which is a decision
+     only a surface layer can express: those rules hard-wired
+     `border: 1px solid var(--color-line)`, so "no outline here" used to
+     mean overriding the component in the app, which is exactly what the
+     geometry split exists to prevent.
+
+     SCOPE — outlines only, never a SEPARATOR. `.hairline*`, `.rule`,
+     `.tds-list__row`, `.tds-table` and `.tds-toggle-row` draw a line
+     BETWEEN two things and keep their literal 1px: a borderless surface
+     still needs its table rows told apart. Same for the semantic
+     `.form-alert`/`.tds-alert` outline, the dashed `.tds-empty` and the
+     decoration shapes, which are graphics rather than chrome.
+
+     Default 1px = byte-identical to before, per the note above. */
+  --tds-border-hairline: 1px;
+
+  /* --- Elevation ---------------------------------------------------
+     Brand-tinted (navy) and layered, per the design-system handoff. The
+     dashboard tint convention is deliberately FLAT, so the default card
+     elevation is `none`; only the marketing surface opts into a shadow. */
+  --tds-shadow-sm:
+    0 1px 2px rgb(5 15 104 / 0.06), 0 2px 4px rgb(5 15 104 / 0.05);
+  --tds-shadow-md:
+    0 2px 4px rgb(5 15 104 / 0.05), 0 6px 12px rgb(5 15 104 / 0.08);
+  --tds-shadow-lg:
+    0 4px 8px rgb(5 15 104 / 0.06), 0 16px 32px rgb(5 15 104 / 0.12);
+  --tds-elevation-card: none;
+  --tds-elevation-raised: var(--tds-shadow-md);
+
+  /* --- Hard shadows (2026-09-22) -----------------------------------
+     A fixed, unblurred offset for the flat "2D" look of the PUBLIC sites.
+     `none` here, so the panels never see one: only the marketing and blog
+     surfaces set the three values, and the primitives read them in rules
+     scoped to those two surfaces. `--tds-shadow-ink` is the colour, flipped
+     by the dark theme and by the dark tones (`.tds-tone-navy/-ink`, in
+     primitives.css) — which re-declare the shadows, because a custom
+     property's `var()` is resolved where it is declared. Never in a
+     `transition`: a shadow is painted, not composited. */
+  --tds-shadow-ink: #050f68;
+  --tds-shadow-hard: none;
+  --tds-shadow-hard-sm: none;
+  --tds-shadow-hard-press: none;
+  /* The lifted state of an interactive element on hover or keyboard focus:
+     it moves 2px up-left (`translate`) and its offset grows by the same 2px,
+     so it reads as coming off the page toward the pointer. */
+  --tds-shadow-hard-hover: none;
+  --tds-shadow-hard-sm-hover: none;
+
+  /* --- Pressed-in form controls (2026-09-28) ------------------------
+     A text field, a select, a checkbox and a radio all sit BELOW the
+     surface: an unblurred inset offset from the top left, as if the
+     control had been pushed into the page. It is the inverse of the hard
+     shadow that lifts a card off it, so the two together say which things
+     you reach into and which things you pick up.
+
+     Unlike `--tds-shadow-hard*`, this one is NOT `none` on the panel: it
+     applies on every surface, because a form field is a form field
+     wherever it stands. The ink is mixed from `--color-black` rather than
+     from `--tds-shadow-ink`, which is the brand navy at full strength —
+     opaque navy inside a 2.5rem input reads as a border, not a depth. */
+  --tds-inset-ink: color-mix(in srgb, var(--color-black) 13%, transparent);
+  --tds-shadow-inset: inset 2px 2px 0 0 var(--tds-inset-ink);
+  --tds-shadow-inset-sm: inset 1px 1px 0 0 var(--tds-inset-ink);
+
+  /* --- Motion -------------------------------------------------------
+     `--tds-ease-out` is the same curve exported as `ease` from
+     `@tracht-digital-labs/tds-shared/motion`. Keep the two in sync:
+     CSS transitions and framer-motion springs must not drift apart. */
+  --tds-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --tds-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --tds-dur-fast: 160ms;
+  --tds-dur-base: 200ms;
+  /* Reserved for the two genuinely slow surfaces — the modal and the mobile
+     drawer. It had no consumers at all until those adopted it. */
+  --tds-dur-slow: 320ms;
+  /* An explicit zero, the twin of `--tds-radius-none`. Needed because a
+     `visibility` step must be instant while still riding the transition
+     list (see `.tds-mobile-menu`), and a literal `0s` there is
+     indistinguishable to a reader — and to design.test.ts — from the
+     hard-coded durations the motion scale exists to eliminate. */
+  --tds-dur-none: 0s;
+  /* The modal bounce on the marketing surface (primitives.css): overshoot
+     once on the way in, a small lift then the drop on the way out. */
+  --tds-ease-bounce-in: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --tds-ease-bounce-out: cubic-bezier(0.36, 0, 0.66, -0.56);
+  --tds-dur-bounce: 420ms;
+
+  /* Loop durations for the indeterminate indicators. Kept separate from the
+     transition scale above because they are periods, not response times: a
+     spinner tuned to `--tds-dur-base` would strobe. The reduced-motion clamp
+     stops both regardless. */
+  --tds-ease-spin: cubic-bezier(0.5, 0.15, 0.5, 0.85);
+  --tds-dur-spin: 700ms;
+  --tds-dur-pulse: 1400ms;
+
+  /* The conduit lines' one-shot build-up. Longer than any response time
+     in the scale on purpose — it is a drawing, not feedback — but it
+     runs ONCE and has no reverse, so it never becomes ambient motion. */
+  --tds-dur-draw: 1200ms;
+
+  /* --- Display type -------------------------------------------------
+     The landingpage renders `.display` at 700 and the blog at 800; both
+     used to fork the class locally. It is a surface token now. */
+  --tds-weight-display: 700;
+  --tds-tracking-display: -0.03em;
+  --tds-leading-display: 0.96;
+  --tds-weight-display-tight: 600;
+  --tds-tracking-display-tight: -0.025em;
+  --tds-leading-display-tight: 1.02;
+  /* The blog sets the eyebrow in the display face at 600; everyone else
+     uses the body face at 500. */
+  --tds-eyebrow-family: var(--font-body);
+  --tds-eyebrow-weight: 500;
+  --tds-eyebrow-tracking: 0.14em;
+  /* An eyebrow is the brand direction's "kleines Label", and that is
+     cranberry's assigned role — it was `--color-muted` (grey), which is why
+     cranberry had exactly ONE call site in the whole library. Measured 7.29:1
+     on paper, so it clears AA for small text and AAA besides; the numeric
+     check lives in design.test.ts, because moving a colour into a TEXT role is
+     precisely where contrast quietly fails and a screenshot never shows it.
+     A token, like the three above, so a surface can opt out without forking
+     the class. Note the panel's own `.tds-page__eyebrow` (app.css) keeps the
+     per-product accent instead — that one is product signal, not decoration. */
+  --tds-eyebrow-color: var(--color-cranberry);
+
+  /* --- Fluid layout ---------------------------------------------------
+     Page width, gutter and grid density. Before these, every app hard-coded
+     its own container: the blog repeated `max-w-5xl mx-auto px-6` in 22 files,
+     which is why nothing above 1024px ever changed shape there — widening the
+     site meant editing 22 files and nobody did.
+
+     TWO CONSTRAINTS THESE NAMES OBEY, both learned the hard way:
+
+     · NO DIGITS IN THE NAME. design.test.ts scans surface files with
+       /var\((--tds-[a-z-]+)/ — a character class with no `0-9`. A token called
+       `--tds-shell-2xl` is captured as `--tds-shell-`, which resolves to
+       nothing, and the "surface references only tokens base.css defines"
+       assertion goes red the moment a surface layer uses it. Word suffixes
+       only. (`--tds-radius-2xl` gets away with it purely because no surface
+       file references it.)
+     · A SURFACE MAY ONLY DECLARE CUSTOM PROPERTIES — no @media, no @container.
+       So anything fluid has to be a clamp() INSIDE the token value, never a
+       query around it. Same reason --tds-panel-title-size is a clamp().
+
+     `--tds-shell-max` is deliberately a plain max and not a clamp: the shell
+     grows with the viewport on its own, and the intrinsic grid answers the
+     extra room with MORE COLUMNS rather than longer lines. Consumers that want
+     a different ceiling set the token; tds-blog-frontend takes it to 120rem. */
+  --tds-shell-max: 90rem;
+  --tds-shell-wide: 104rem;
+  --tds-shell-article: 82rem;
+  --tds-shell-prose: 48rem;
+
+  /* Long-form reading measure. Stays a `ch` max-width, never a vw clamp:
+     .tds-prose also renders inside the admin panel's help centre and its CMS
+     preview, where a viewport-derived width would overflow a narrow content
+     pane on a wide screen. */
+  --tds-measure: 65ch;
+
+  /* Minimum track for the intrinsic card grid. */
+  --tds-grid-min: 16rem;
+
+  /* Minimum track for `.tds-product-grid`. Its own token rather than
+     `--tds-grid-min`, because the two grids answer different content: a
+     product card carries a 4:3 image and a title that breaks badly below this
+     width, and a site that widens its shell (the shop, at 120rem) wants the
+     extra room as wider cards, not as a seventh narrow column. */
+  --tds-product-grid-min: 15rem;
+
+  --tds-gutter: clamp(1.25rem, 0.9rem + 1.6vw, 2.5rem);
+
+  /* The wash a hovered row takes. Coral, because "Hoverzustände" is exactly
+     what the brand direction assigns it — the three row primitives
+     (`.tds-list__row`, `.tds-table tbody tr`, `.entry-row`) all used the
+     neutral sand, so the warmest hue in the palette was doing no work in the
+     interface at all. A token because three rules read it, and because a raw
+     `rgba()` here would be the hard-coded alpha the `--tds-decor-*` tokens
+     exist to avoid. */
+  --tds-hover-wash: color-mix(in srgb, var(--color-accent-pink) 12%, transparent);
+
+  /* --- Accepted alias ------------------------------------------------
+     `--color-border` is NOT a second border token: it is an alias of
+     `--color-line`, kept because 27 call sites across 8 repos (all four
+     `tds-tool-*` packs, ext-website-cms, ext-tools, the panel host) write
+     `border-[color:var(--color-border)]`. Before this alias existed the
+     token resolved to nothing and every one of those borders silently fell
+     back to `currentColor`. Because it is declared as a `var()` reference
+     it re-resolves under `:root[data-theme="dark"]` automatically, so it
+     needs no dark value of its own. Prefer `--color-line` in new code;
+     do not "clean up" this alias without fixing all 27 sites first. */
+  --color-border: var(--color-line);
+
+  /* === Brand palette aliases ("Digitale Maßarbeit") =================
+     Non-semantic names for the two brand hues that only ever existed
+     here under a SEMANTIC name: cranberry was `--color-cat-rose` (a
+     wayfinding hue) and gold was `--color-warning` (an operational
+     state). Decoration reaching for either of those reads as "this is a
+     warning" to the next person editing it, and worse, pins the
+     decoration to a token whose job is to change when the status palette
+     is retuned.
+
+     They are `var()` references in a PLAIN `:root`, not literals in
+     `@theme inline`, for two reasons: a var() alias re-resolves under
+     `:root[data-theme="dark"]` for free (same trick as --color-border
+     above), and nothing generates `bg-gold` utilities from them — the
+     decoration layer consumes them through var() only. */
+  --color-cranberry: var(--color-cat-rose);
+  --color-gold: var(--color-warning);
+
+  /* === Decoration layer ============================================
+     The "Digitale Maßarbeit" background language: soft brand fields,
+     constructed geometric shapes and the fine conduit lines. See the
+     `.tds-wash` / `.tds-shape` / `.tds-circuit` / `.tds-brandbar` block
+     in primitives.css.
+
+     WHY RGB TRIPLETS AND NOT THE COLOUR TOKENS: every one of these is
+     used at a low alpha over an arbitrary background, and
+     `color-mix(… X%, transparent)` is not the same thing as an alpha —
+     it also mixes toward transparent BLACK in some engines' sRGB path,
+     which greys a warm field. `rgb(var(--tds-decor-navy) / 0.12)` is an
+     honest alpha, and keeping the triplet as a token is what lets the
+     dark block in base/colors.css swap the whole decoration to its lifted values in
+     one place.
+
+     `--tds-decor-field-strength` is the single dial for how present the
+     radial fields are; the mobile media query at the foot of this file
+     and the dark block both turn it down. */
+  --tds-decor-navy: 5 15 104;
+  --tds-decor-bordeaux: 130 9 51;
+  --tds-decor-coral: 255 122 156;
+  --tds-decor-gold: 185 121 28;
+  --tds-decor-field-strength: 1;
+  /* Conduit lines are a whisper by design — "nur wenige Linien pro
+     Abschnitt", and they must never compete with body copy. Raised one step
+     (0.16 → 0.20) because at the original dose they were, in practice,
+     invisible: the point of drawing them is that someone sees them. */
+  --tds-decor-line-opacity: 0.2;
+  --tds-decor-shape-alpha: 0.09;
+
+  /* The three-part brand accent (bordeaux : coral : gold ≈ 42 : 20 : 12
+     with a 6px gap). Tokenised so a surface or a single call site can
+     scale it without re-deriving the five background-position values. */
+  --tds-brandbar-height: 4px;
+  --tds-brandbar-gap: 6px;
+  --tds-brandbar-1: 42px;
+  --tds-brandbar-2: 20px;
+  --tds-brandbar-3: 12px;
+
+  /* --- Panel surface family ----------------------------------------
+     The dashboard chrome (app.css) reads these; only surfaces/panel.css
+     gives them real values. The defaults here are deliberately INERT —
+     a transparent glow, a rail that is a flat `--color-surface-navy`,
+     a canvas equal to `--color-paper` — so any consumer that renders
+     `.portal-sidebar` or `.tds-page` WITHOUT `data-surface="panel"`
+     (there are none today, but app.css is also imported by the blog for
+     `.editorial-grid`) is byte-identical to before these existed.
+
+     `--tds-panel-accent` is the one knob everything else derives from:
+     the rail gradient, the canvas tint, the glow and the page-head rule
+     are all `color-mix()`es over it. That is what lets a single
+     `[data-surface="panel"][data-frontend="admin"]` token block re-theme
+     the whole management frontend to the burgundy without a second
+     component rule.
+
+     No dark twins are needed: every value a surface layer builds from
+     these mixes an already-flipping token (`--color-paper`,
+     `--color-surface-navy`, `--color-surface-ink`), so dark mode
+     follows automatically. */
+  --tds-panel-accent: var(--color-primary);
+  --tds-panel-rail-from: var(--color-surface-navy);
+  --tds-panel-rail-to: var(--color-surface-navy);
+  --tds-panel-canvas: var(--color-paper);
+  --tds-panel-glow: transparent;
+  --tds-panel-title-size: 1.5rem;
+
+  /* --- Page-token escape hatch --------------------------------------
+     `.portal-sidebar` re-maps --color-ink/-muted/-line/-soft/-card to
+     light/translucent values WITHIN the rail, which is what makes every
+     child read correctly on the dark panel. A child that visually belongs
+     to the PAGE rather than to the rail (the floating expand button that
+     sits half-outside it) therefore has no way to reach the real page
+     values — app.css hard-coded #e8e6df / #6b6b66 / #1a2138 for exactly
+     this reason, duplicating three tokens that will drift the moment
+     anyone retunes the palette.
+
+     These aliases are the fix. A custom property's computed value has its
+     var()s already substituted ON THE ELEMENT THAT DECLARES IT, so these
+     resolve here at :root — against the page's tokens, and against the
+     dark ones under [data-theme="dark"] — and inherit down as literals
+     that the rail's remap cannot touch. */
+  --tds-page-card: var(--color-card);
+  --tds-page-line: var(--color-line);
+  --tds-page-muted: var(--color-muted);
+}
+
+/* Decoration is turned down on phones. The radial fields are placed at
+   the OUTER EDGES of a wide viewport, where they never come near a line
+   of text; at 375px those same percentage positions land underneath the
+   copy, and the shapes that bleed off a desktop edge cover half a phone.
+   Reducing the dial rather than removing the fields keeps the warmth.
+
+   `:root` inside a media query is (0,1,0) and deliberately does NOT beat
+   `:root[data-theme="dark"]` (0,2,0) — dark mode is already at 0.55, and
+   an even fainter field there would be nothing at all. */
+@media (max-width: 48rem) {
+  :root {
+    --tds-decor-field-strength: 0.55;
+    --tds-decor-shape-alpha: 0.06;
+  }
+}

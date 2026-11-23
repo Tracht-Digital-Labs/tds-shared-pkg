@@ -1,0 +1,359 @@
+/* === Sidebar nav items =========================================== */
+
+/* Shared nav-link treatment for the panel sidebars. The active item gets a
+   tinted wayfinding fill + a 2px left indicator bar in the primary (or a
+   per-item `--nav-hue`).
+   The host shell must actually APPLY `.nav-item--active` — it ships
+   `data-nav` attributes on each link, and for a long while nothing read
+   them, so this active treatment was dead code from the panel's point of
+   view. */
+.nav-item {
+  /* NOTE: `--nav-hue` is deliberately NOT declared here. It arrives by
+     inheritance - inline per section from NavList.astro, or the rail's white
+     fallback. Declaring it on this element would win over BOTH (an element's
+     own declaration beats an inherited value regardless of the parent's
+     specificity, and the inline style sits on `.nav-group`, a different
+     element). It used to be declared here, which is exactly what happened:
+     every active item resolved to `--color-primary` - navy text on the navy
+     rail, 1.11:1 - and the per-zone colour-coding reached nothing. */
+
+  /* The wayfinding hue as INK on the dark rail. The categorical palette is
+     tuned for dark-on-light body text, so the raw hue is unreadable here;
+     lifting it toward the panel's ink (white inside the rail, see the token
+     remap below) keeps the hue identifiable and clears AA in both themes.
+     Derived on THIS element so the mix substitutes the inherited
+     per-section hue. */
+  --nav-ink: color-mix(
+    in srgb,
+    var(--nav-hue, var(--color-primary)) 40%,
+    var(--color-ink)
+  );
+  position: relative;
+  display: grid;
+  /* icon | label. `1fr` (not `auto`) so every label starts on the same
+     x-position regardless of its length, and so the label can be hidden
+     in the collapsed rail without the icon moving. */
+  grid-template-columns: 1.75rem 1fr;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: var(--tds-radius-btn);
+  /* Transparent border at rest so `.nav-item--active`'s 1px border does
+     not shift the row by a pixel when it appears. */
+  border: 1px solid transparent;
+  color: var(--color-muted);
+  transition:
+    color var(--tds-dur-fast) var(--tds-ease-out),
+    background-color var(--tds-dur-fast) var(--tds-ease-out),
+    border-color var(--tds-dur-fast) var(--tds-ease-out);
+}
+.nav-item:hover {
+  color: var(--color-ink);
+  background: var(--color-soft);
+}
+/* The tinted icon chip — the same 14% wash / hue-coloured glyph as
+   `.stat-tile__icon`, so a nav row and a KPI tile of the same hue read as
+   the same family. Sized to the grid column. */
+.nav-item__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  color: currentColor;
+  background: transparent;
+  transition:
+    color var(--tds-dur-fast) var(--tds-ease-out),
+    background-color var(--tds-dur-fast) var(--tds-ease-out);
+}
+.nav-item:hover .nav-item__icon,
+.nav-item--active .nav-item__icon {
+  color: var(--nav-ink);
+  /* Scrim rather than a mix of the ink, for the same fallback reason as
+     `.nav-item--active` below: the glyph would otherwise vanish into its
+     own chip without `color-mix`. */
+  background: rgb(255 255 255 / 0.14);
+}
+.nav-item__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nav-item--active {
+  color: var(--nav-ink);
+  /* A plain white scrim, NOT a `color-mix()` of the ink. Two reasons: the
+     rail is a gradient, so a `--color-card`-based fill would band against
+     it; and lightningcss emits a no-`color-mix` fallback that collapses a
+     `color-mix(var(--x) …)` to bare `var(--x)` — which, with the label also
+     reading `--nav-ink`, rendered the row's text in its own background
+     colour on any engine without `color-mix`. The hue still identifies the
+     row through the ink, the border, the indicator bar and the icon chip. */
+  background: rgb(255 255 255 / 0.1);
+  border-color: color-mix(in srgb, var(--nav-ink) 30%, transparent);
+}
+/* Left indicator bar. Drawn on every item but scaled to nothing until
+   active, so it GROWS into place instead of appearing — `scaleY` and
+   `opacity` are both compositor-only, and an unstyled non-active item
+   still paints nothing. */
+.nav-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 1.25rem;
+  border-radius: 1px;
+  background: var(--nav-ink);
+  opacity: 0;
+  transform: translateY(-50%) scaleY(0.2);
+  transition:
+    opacity var(--tds-dur-base) var(--tds-ease-out),
+    transform var(--tds-dur-base) var(--tds-ease-out);
+}
+.nav-item--active::before {
+  opacity: 1;
+  transform: translateY(-50%) scaleY(1);
+}
+/* Collapsed icon rail hides the indicator bar (the rail is centred). */
+.portal-sidebar.collapsed .nav-item::before {
+  display: none;
+}
+
+/* Small uppercase group heading between nav sections. Promoted from the
+   host's global.css, which was the only component class it owned. */
+.nav-group-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+  margin: 0.75rem 0.75rem 0.25rem;
+}
+
+/* === Sidebar surface (bold navy panel) =========================== */
+
+/* The panel sidebars are a fixed deep-navy panel in BOTH themes
+   (`--color-surface-navy` never flips). Rather than restyle every child,
+   we re-map the structural tokens *within the panel* to light /
+   translucent-white — so the nav items, wordmark, collapse button,
+   version text, sign-out and the ThemeToggle's rest state all read light
+   automatically. `--color-primary` is deliberately NOT remapped (it would
+   make the active indicator vanish on navy); the active state is set to a
+   light treatment explicitly below. Children that visually belong to the
+   PAGE, not the panel (the floating expand button, the `.nav-tip`
+   tooltip), opt back out.
+
+   The mobile `.nav-drawer-panel` (below) reuses the exact same surface +
+   token remap so the slide-in drawer reads identically to the desktop
+   rail — it's added to each selector here rather than re-inlined. */
+.portal-sidebar,
+.nav-drawer-panel {
+  /* Gradient rail. Both stops are FIXED-dark tokens (surface-navy /
+     surface-ink), so this stays a dark panel in both themes — which is
+     what the token remap below depends on. The angle is off-vertical so
+     the deepening reads as depth rather than as a banded fill.
+     `--tds-panel-rail-*` are inert (flat navy) outside the panel surface,
+     so this is a no-op for any other consumer of app.css. */
+  background: linear-gradient(
+    168deg,
+    var(--tds-panel-rail-from) 0%,
+    var(--tds-panel-rail-to) 100%
+  );
+  /* 1px inner highlight on the trailing edge — catches the light against
+     the page canvas without a hard border. */
+  box-shadow: inset -1px 0 0 rgb(255 255 255 / 0.07);
+  border-right-color: rgb(255 255 255 / 0.1);
+  --color-ink: #ffffff;
+  --color-muted: rgb(255 255 255 / 0.68);
+  --color-line: rgb(255 255 255 / 0.16);
+  --color-soft: rgb(255 255 255 / 0.08);
+  --color-card: var(--color-surface-navy);
+  --nav-hue: #ffffff;
+  /* Re-declare `color` so the remap also reaches text that only *inherits*
+     its colour (the wordmark's "Tracht", `.link-underline { color: inherit }`
+     sign-out links). Without this the panel's children inherit the PAGE's
+     ink — near-black on navy in light mode. */
+  color: var(--color-ink);
+}
+/* The active nav item needs no rail-specific override any more. It reads
+   `--nav-ink`, derived per item from the inherited per-section `--nav-hue`
+   against the panel's `--color-ink` — white in here because of the remap
+   above — so the sections read as distinct colour-coded zones on the navy
+   panel automatically, in both themes.
+
+   This block used to restate the treatment in the RAW hue. That was a claim
+   ("the categorical hues are bright enough to stay legible on navy") that
+   measurement did not support: the light-theme palette is tuned for dark
+   text on a light canvas, and violet/teal on navy lands near 2:1. */
+/* Burgundy `--color-accent` is too dark on navy — lift the wordmark
+   italic to the light pink accent. */
+.portal-sidebar .accent-italic,
+.nav-drawer-panel .accent-italic {
+  color: var(--color-accent-pink);
+}
+/* Quick action (.btn-primary) + collapsed round "+" : a navy fill would
+   disappear on navy, so use the light pink accent with navy text. */
+.portal-sidebar .btn-primary,
+.portal-sidebar .sidebar-show-collapsed,
+.nav-drawer-panel .btn-primary {
+  background: var(--color-accent-pink);
+  color: var(--color-surface-navy);
+}
+/* The floating expand button sits half-outside on the page edge, so it
+   must contrast with the PAGE, not the panel. It reaches the real page
+   values through the `--tds-page-*` aliases (base.css), which are
+   computed at :root and so survive the remap above — this used to be
+   three hard-coded hexes duplicating --color-card/-line/-muted, plus a
+   second dark-theme rule to re-duplicate them. Both are gone: these
+   flip with the theme on their own. */
+.portal-sidebar .sidebar-expand {
+  background: var(--tds-page-card);
+  border-color: var(--tds-page-line);
+  color: var(--tds-page-muted);
+}
+
+/* === Collapsed icon rail ========================================== */
+
+/* The rail collapses to an icon strip, toggled by the host shell
+   (`sidebarCollapse.ts` adds `.collapsed` and persists the choice).
+   `.portal-sidebar.collapsed` previously had exactly ONE rule — hiding
+   the active indicator — with nothing to actually collapse; the width,
+   the label hiding and the tooltip below are what make it a feature.
+
+   Only the rail collapses. The mobile `.nav-drawer-panel` shares the
+   rail's surface but is already a deliberate full-label overlay. */
+.portal-sidebar {
+  transition: width var(--tds-dur-base) var(--tds-ease-in-out);
+  /* A collapsing rail that is a flex sibling of `main` CANNOT be made
+     compositor-only — changing its width is a layout change by definition,
+     and there is no transform that moves the page content with it. So the
+     goal here is not to avoid the reflow but to bound it: `contain` tells
+     the engine that nothing outside this subtree depends on its internals,
+     so the per-frame work is the rail plus the main column rather than the
+     whole document.
+
+     `layout` ONLY. Not `paint` — the collapsed rail's tooltips are
+     `::after`s at `left: calc(100% + 0.75rem)`, i.e. deliberately outside
+     the rail's own box, and paint containment would clip every one of them.
+     Not `size` either — the width is precisely what changes here. */
+  contain: layout;
+}
+/* `will-change` only while it is actually moving. Left on permanently it
+   holds a composited layer for a rail that is static ~100% of the time;
+   sidebarCollapse.ts adds the class on toggle and drops it on transitionend. */
+.portal-sidebar.is-animating {
+  will-change: width;
+}
+.portal-sidebar.collapsed {
+  width: 4.5rem;
+}
+.portal-sidebar.collapsed .nav-item {
+  grid-template-columns: 1.75rem;
+  justify-content: center;
+  gap: 0;
+}
+.portal-sidebar.collapsed .nav-item__label,
+.portal-sidebar.collapsed .nav-group-label,
+.portal-sidebar.collapsed .sidebar-hide-collapsed {
+  display: none;
+}
+/* With the wordmark and the footer label hidden there is nothing left for
+   the head/foot rows to align against, so centre what remains (the collapse
+   button, the theme toggle) rather than leaving them pinned right. */
+.portal-sidebar.collapsed .sidebar-head,
+.portal-sidebar.collapsed .sidebar-foot {
+  justify-content: center;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.portal-sidebar.collapsed .sidebar-head .btn {
+  margin-left: 0;
+}
+/* Hairline above the footer row, in the rail's remapped (translucent white)
+   line token. */
+.sidebar-foot {
+  border-top: 1px solid var(--color-line);
+}
+/* Keep a visible separation between groups once their labels are gone,
+   otherwise the collapsed rail is one undifferentiated column of icons. */
+.portal-sidebar.collapsed .nav-group + .nav-group {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-line);
+}
+/* Label-as-tooltip. Pure CSS (no JS, no positioning library): the rail is
+   a fixed-width column, so a right-anchored absolute box is always in the
+   right place. `.nav-tip` opts OUT of the rail's token remap — it floats
+   over the page, so it uses the page tokens like `.sidebar-expand`. */
+.portal-sidebar.collapsed .nav-item[data-tip] {
+  position: relative;
+}
+.portal-sidebar.collapsed .nav-item[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 0.75rem);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 70;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--tds-radius-input);
+  background: var(--color-surface-ink);
+  color: #ffffff;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--tds-dur-fast) var(--tds-ease-out);
+}
+.portal-sidebar.collapsed .nav-item[data-tip]:hover::after,
+.portal-sidebar.collapsed .nav-item[data-tip]:focus-visible::after {
+  opacity: 1;
+}
+
+/* === Mobile nav drawer ============================================ */
+
+/* Below `lg` the persistent navy sidebar is replaced by a slide-in
+   drawer behind a hamburger in the mobile top bar. The panel carries
+   `.nav-drawer-panel` (navy surface + token remap, above) so it mirrors
+   the desktop rail; this block only owns the overlay + slide geometry.
+   Toggled via `data-open` on the `.nav-drawer` root. */
+.nav-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  visibility: hidden;
+  pointer-events: none;
+}
+.nav-drawer[data-open="true"] {
+  visibility: visible;
+  pointer-events: auto;
+}
+.nav-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(4 8 20 / 0.55);
+  opacity: 0;
+  transition: opacity var(--tds-dur-slow) var(--tds-ease-out);
+}
+.nav-drawer[data-open="true"] .nav-drawer-backdrop {
+  opacity: 1;
+}
+.nav-drawer-panel {
+  position: relative;
+  height: 100%;
+  width: min(82vw, 17rem);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform var(--tds-dur-slow) var(--tds-ease-in-out);
+  overflow-y: auto;
+}
+.nav-drawer[data-open="true"] .nav-drawer-panel {
+  transform: translateX(0);
+}
+/* NB: no reduced-motion block here any more. The one that used to sit at
+   this spot only re-clamped `transition-duration`, which base.css already
+   does globally with `!important` — it read as coverage while adding
+   nothing. The drawer's motion is a slide from off-screen, so clamping the
+   duration IS the correct reduced-motion behaviour; there is no end state
+   to reset the way a hover-lift has. */

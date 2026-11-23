@@ -1,0 +1,45 @@
+/* === Editorial type primitives ==================================== */
+
+/* Weight/tracking/leading come from the surface scale so a surface can
+   set its own display voice (landingpage 700, blog 800) without forking
+   the class. Do NOT re-declare `.display` in an app's global.css. */
+.display {
+  font-family: var(--font-display);
+  font-weight: var(--tds-weight-display);
+  letter-spacing: var(--tds-tracking-display);
+  line-height: var(--tds-leading-display);
+}
+.display-tight {
+  font-family: var(--font-display);
+  font-weight: var(--tds-weight-display-tight);
+  letter-spacing: var(--tds-tracking-display-tight);
+  line-height: var(--tds-leading-display-tight);
+}
+.accent-italic {
+  font-style: italic;
+  color: var(--color-accent);
+}
+.eyebrow {
+  font-family: var(--tds-eyebrow-family);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: var(--tds-eyebrow-tracking);
+  color: var(--tds-eyebrow-color);
+  font-weight: var(--tds-eyebrow-weight);
+}
+.lead {
+  font-size: clamp(1.0625rem, 1.5vw, 1.1875rem);
+  line-height: 1.55;
+  color: var(--color-ink);
+}
+.tabular,
+.tabular * {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Section spacing — the vertical rhythm for a numbered section. Tuned
+   to keep editorial air without oversized whitespace: ~52px on phones
+   up to ~104px on wide screens. */
+.section-spacing {
+  padding: clamp(3.25rem, 6.5vw, 6.5rem) 0;
+}

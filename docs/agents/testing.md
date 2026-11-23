@@ -14,6 +14,11 @@ hairline vs separator; flat fill counterparts; shadow scoping; the panel base ac
 contrast of text roles through the real token chain; toast variants; `.tds-modal` without `z-index` / `position: fixed`;
 no `outline: none` in `:focus`; lane publishers set and clear; durations from tokens; no token names with digits.
 
+Read a stylesheet with `readStylesheet(entry)` from `__tests__/stylesheet.ts`, never `readFileSync`: the four large
+entries hold only `@import`s, so a raw read finds nothing, and an assertion that loops over matches passes without
+checking anything. `stylesheets.test.ts` holds the entry shape: imports only, every partial imported once, no
+partial importing further.
+
 ## Other suites worth knowing
 
 | Suite | Covers |
@@ -26,7 +31,7 @@ no `outline: none` in `:focus`; lane publishers set and clear; durations from to
 | `packRelease.test.ts` | Runs `pack-release.mjs` against a fake `dist/`: tree layout, startup-file fallback, release stamp, build gate by the runtime formula, refusals, and every import-scan rule. Mutation check: 24 breakages, 23 caught (the `satori` exemption needs an `npm install`) |
 | `PostCover.test.tsx` | No bare `var(--tds-flat-tint)` |
 | `AccountMenu.test.tsx` | Absolute auth origin for writes, DELETE logout, hint keys |
-| `prefs.test.ts` | Bottom-fixed elements add `--tds-tabbar-lane` |
+| `prefs.test.ts` | Bottom-fixed elements add `--tds-tabbar-lane` (and at least one such element exists) |
 | `cache/pageCache.test.ts` | Middleware hit/miss/304/HEAD/refresh and every bypass rule; control-plane auth, errors, purge, rebuild outcomes and concurrency. Mutation check: 19 breakages, 19 caught |
 | `LiveChatCta.test.tsx` | See below |
 
