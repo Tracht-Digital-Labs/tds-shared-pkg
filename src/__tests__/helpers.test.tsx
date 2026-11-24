@@ -1,14 +1,13 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { downloadBlob, downloadBytes, downloadText } from "../download";
 import { copyText, useCopyFlag } from "../clipboard";
 import { crc32, createZip, readZip, safeZipName, safeZipPath } from "../zip";
 import { Alert } from "../alert";
 import { RangeField, Segmented, StatusChip, SummaryMetric, TabPanel, Tabs } from "../components";
 import { primeRuntimeConfig } from "../api";
+import { readStylesheet } from "./stylesheet";
 
 afterEach(cleanup);
 
@@ -147,7 +146,7 @@ describe("Alert", () => {
   });
 
   it("has a CSS rule for every tone", () => {
-    const css = readFileSync(join(__dirname, "../../styles/primitives.css"), "utf8");
+    const css = readStylesheet("primitives.css");
     for (const tone of ["danger", "warning", "success", "info"]) expect(css).toContain(`.tds-alert--${tone} {`);
   });
 });

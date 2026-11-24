@@ -1,0 +1,279 @@
+/* === Filter bar ==================================================== */
+
+/* A collapsible filter panel for a listing (journal index, shop catalogue,
+   tools catalogue). Two parts, deliberately apart: the TOGGLE is a brand
+   button at the right end of a row (the listing's heading row, or a
+   `.tds-filterbar` row of its own), and the PANEL opens across the full width.
+   One behaviour on every site since 0.57: pressing the toggle hides it
+   (`hidden`) and the panel takes its place; the panel's close button
+   (`[data-filter-close]`, `.tds-filterbar__close`) or Escape brings it back. A `<details>` cannot do
+   that — its summary and its content are one box — so the toggle is a
+   `<button aria-expanded aria-controls>` and the panel a region it controls.
+   Filtering happens in the browser over what the page already rendered (the
+   page cache keys on the path, so a query string can never change the HTML);
+   Astro pages wire it with `mountFilterBar(panel, …)` from `./filter`, a React
+   island follows the same markup with its own state.
+
+     <div class="… heading row …">
+       <h2>…</h2>
+       <button type="button" class="btn btn-primary tds-filterbar__toggle"
+               data-filter-toggle aria-expanded="false" aria-controls="listing-filter">
+         <svg class="tds-filterbar__icon" …/> <span class="tds-filterbar__label">Filter</span> <span class="tds-filterbar__count"></span>
+       </button>
+     </div>
+     <div class="tds-filterbar__panel" id="listing-filter" hidden>
+       <input type="search" class="field-boxed tds-filterbar__search" data-filter-search>
+       <fieldset class="tds-filterbar__group">
+         <legend class="tds-filterbar__legend">Art</legend>
+         <div class="tds-toolbar">
+           <button type="button" class="chip" data-filter-group="kind" data-value="all" aria-pressed="true">Alle</button> …
+       <button type="button" class="tds-filterbar__reset" data-filter-reset>Filter zurücksetzen</button>
+       <button type="button" class="tds-filterbar__close" data-filter-close aria-label="Filter schließen">…</button>
+
+   The panel is the one thing here that ships `hidden`: it is a closed
+   disclosure, exactly what a closed `<details>` ships, and it only ever opens
+   on a click. The count is empty while no filter is set and takes no room.
+
+   The toggle's look is the brand button's (`.btn.btn-primary`: navy, the
+   surface's radius, the coral hard offset, lift on hover, press on click);
+   this block adds only the icon, the count and the chevron. */
+/* A row of its own for a listing without a heading row (the shop, under its
+   hero): the toggle at the end, the open panel across all of it. */
+.tds-filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem 1rem;
+}
+.tds-filterbar > .tds-filterbar__panel {
+  flex: 1 1 100%;
+  margin-block: 0;
+}
+/* `.btn` sets `display`, which would beat the UA's `[hidden]`: an open
+   panel's toggle must really be gone. */
+.tds-filterbar__toggle[hidden] {
+  display: none;
+}
+.tds-filterbar__toggle {
+  flex: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tds-filterbar__icon {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+/* On a phone the heading row has no room for the word: the toggle keeps its
+   icon, count and chevron on the heading's line, and the label stays for
+   screen readers only (wrap it in `.tds-filterbar__label`). */
+@media (max-width: 30rem) {
+  .tds-filterbar__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+  .tds-filterbar__toggle {
+    padding-inline: 0.75rem;
+  }
+}
+/* The chevron is drawn, not shipped as an icon: it turns with the state. */
+.tds-filterbar__toggle::after {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  margin-inline-start: 0.125rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  rotate: 45deg;
+  translate: 0 -0.15em;
+  transition: rotate var(--tds-dur-fast) var(--tds-ease-out),
+    translate var(--tds-dur-fast) var(--tds-ease-out);
+}
+/* On the navy button the count is a coral tab with ink figures. */
+.tds-filterbar__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.3rem;
+  border-radius: var(--tds-radius-chip);
+  background: var(--color-accent-pink, var(--color-accent));
+  color: var(--color-surface-ink, #111);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.tds-filterbar__count:empty {
+  display: none;
+}
+.tds-filterbar__panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem 1.75rem;
+  margin-block: 0.25rem 1.5rem;
+  padding: 1rem 1.125rem;
+  border: var(--tds-border-hairline) solid var(--color-line);
+  border-radius: var(--tds-radius-card);
+  background: var(--tds-flat-tint, var(--color-card));
+}
+/* `display: flex` above would beat the UA's `[hidden]`. */
+.tds-filterbar__panel[hidden] {
+  display: none;
+}
+/* It unfolds where the toggle stood: a short drop and fade, so the swap of
+   button for panel reads as one thing opening rather than two things
+   trading places. Opacity and transform only. */
+@media (prefers-reduced-motion: no-preference) {
+  .tds-filterbar__panel:not([hidden]) {
+    animation: tds-filterbar-in var(--tds-dur-base) var(--tds-ease-out);
+  }
+}
+@keyframes tds-filterbar-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.375rem);
+  }
+}
+:is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"]) .tds-filterbar__panel {
+  box-shadow: var(--tds-shadow-hard);
+}
+.tds-filterbar__search {
+  flex: 1 1 16rem;
+  max-width: 28rem;
+}
+/* The chosen option is filled, not only recoloured: on the blog surface a chip
+   has no hairline, so `.chip-active`'s accent text was the only cue left. */
+.tds-filterbar__panel button.chip[aria-pressed="true"] {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border-color: var(--color-primary);
+}
+.tds-filterbar__group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.tds-filterbar__legend {
+  margin-bottom: 0.5rem;
+  padding: 0;
+  font-family: var(--tds-eyebrow-family);
+  font-size: 0.6875rem;
+  font-weight: var(--tds-eyebrow-weight);
+  letter-spacing: var(--tds-eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.tds-filterbar__reset {
+  margin-inline-start: auto;
+  padding: 0.25rem 0;
+  border: 0;
+  background: none;
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+.tds-filterbar__reset:hover {
+  color: var(--color-accent);
+}
+.tds-filterbar__reset:disabled {
+  color: var(--color-muted);
+  text-decoration: none;
+  cursor: default;
+}
+/* Closes the panel and brings the toggle back. A drawn cross, square, in the
+   surface's chip radius; it sits after the reset at the row's end. */
+.tds-filterbar__close {
+  position: relative;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: var(--tds-border-hairline) solid var(--color-line);
+  border-radius: var(--tds-radius-chip);
+  background: var(--color-card);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.tds-filterbar__close::before,
+.tds-filterbar__close::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 0.875rem;
+  height: 2px;
+  background: currentColor;
+  translate: -50% -50%;
+  rotate: 45deg;
+}
+.tds-filterbar__close::after {
+  rotate: -45deg;
+}
+.tds-filterbar__close:hover {
+  color: var(--color-accent);
+}
+.tds-filterbar__reset + .tds-filterbar__close {
+  margin-inline-start: 0;
+}
+.tds-filterbar__panel > .tds-filterbar__close:only-of-type:not(.tds-filterbar__reset + *) {
+  margin-inline-start: auto;
+}
+@media (pointer: coarse) {
+  .tds-filterbar__reset {
+    min-height: 2.75rem;
+  }
+  .tds-filterbar__close {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+/* A section that rises in as it scrolls into view — driven by the scroll
+   position itself (`animation-timeline: view()`), so no script, no
+   IntersectionObserver, nothing to hydrate.
+   Two rules make it safe to put on a public page:
+   - It only exists where it can finish. Behind `@supports` and
+     `no-preference`; everywhere else the element is simply visible.
+   - NEVER on the hero or anything else above the fold. An element that is
+     already in view at load resolves straight to its end state, but the
+     LCP candidate must not depend on that — design.test.ts forbids
+     `.tds-reveal` in a hero. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .tds-reveal {
+      animation: tds-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+/* The travel distance is a custom property so a phone can shorten it:
+   1.5rem is a gentle rise on a desktop, but on a 390px screen the same
+   distance reads as the section sliding in rather than settling. */
+.tds-reveal {
+  --tds-reveal-shift: 1.5rem;
+}
+@media (max-width: 40rem) {
+  .tds-reveal {
+    --tds-reveal-shift: 0.75rem;
+  }
+}
+@keyframes tds-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--tds-reveal-shift));
+  }
+}

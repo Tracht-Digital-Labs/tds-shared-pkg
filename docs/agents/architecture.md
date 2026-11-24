@@ -9,6 +9,7 @@ styles/                    design-system CSS, shipped as-is (not built)
 ├── prose.css              .tds-prose long-form typography
 ├── app.css                panel/dashboard chrome (imports primitives)
 ├── app-shell.css          phone app shell (opt-in)
+├── {base,primitives,app,app-shell}/   the partials those four entries import, one per concern
 ├── page-transitions.css   cross-document page fades
 └── surfaces/{marketing,blog,panel}.css   geometry tokens only
 src/
@@ -36,7 +37,7 @@ src/
 ├── cache/                 SERVER-ONLY page cache (node:fs); own entry point
 ├── site/                  server helpers the public sites shared by copy
 └── install/               host-side setup wizard (React island)
-scripts/                   pack-release.mjs, app.cjs (release spine); geo-audit.mjs, lint-primitives.mjs (bins)
+scripts/                   pack-release.mjs, release/verify.mjs, app.cjs (release spine); geo-audit.mjs (+ geo-audit/), lint-primitives.mjs (bins)
 ```
 
 Each directory with consumers is its own `exports` entry (`./api`, `./data`, `./cache`, `./site`, `./install`,
@@ -107,7 +108,8 @@ ignores `X-Forwarded-Proto`; TLS ends at Plesk's nginx, so it always reads `http
 ## `scripts/`: the release spine for SSR consumers
 
 `scripts/pack-release.mjs` assembles the deploy tree (`app.cjs`, `package.json`, `server/`, `client/`, a prebuilt
-`node_modules/`, `tmp/`); `scripts/app.cjs` is the canonical Passenger startup file. Consumed **by path** as a
+`node_modules/`, `tmp/`) and checks it with `scripts/release/verify.mjs`; `scripts/app.cjs` is the canonical
+Passenger startup file. Consumed **by path** as a
 `postbuild`:
 
 ```jsonc

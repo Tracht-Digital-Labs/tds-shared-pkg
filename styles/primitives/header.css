@@ -1,0 +1,243 @@
+/* === Header shell ================================================= */
+
+/* The public property bar — the one top bar the journal, the tools site and
+   the shop share, inside `.brand-header`. The three used to draw their own:
+   three widths, three link styles, three orders and two sets of names for the
+   same sibling sites, so following a link between them moved the logo and
+   renamed the links. Markup stays in each site, because the extras differ (the
+   journal's search and Entdecken, the shop's basket); the geometry, the link
+   voice and — through `propertyNav()` in `/nav` — the list itself do not.
+
+   Put it on the element that also carries `.tds-shell`, so the bar's edges are
+   the page's. Below 64rem the nav and the desktop cluster give way to the
+   app tab bar at the bottom (`.tds-tabbar`, app-shell.css); the header is then
+   the page's first line, not a bar.
+
+   From 64rem it is not a bar either: two islands in the corners
+   (`.tds-sitebar__island`, see below) with the page running between them. */
+/* min-height 3.75rem with 0.5rem padding leaves 2.75rem, so a 44px control (a
+   coarse-pointer link, the CTA) fits without growing the row. */
+.tds-sitebar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3.75rem;
+  padding-block: 0.5rem;
+}
+.tds-sitebar__brand {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0.5rem;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-decoration: none;
+}
+/* The logomark and the property's name are two things (2026-10-19, asked
+   for): the TD mark is the company, "Ratgeber" / "Online-Tools" /
+   "Digitalmarkt" the area. A hairline between them says so at every width,
+   without markup of its own in the three headers. */
+.tds-sitebar__brand > .brand-logo + span {
+  padding-inline-start: 0.625rem;
+  border-inline-start: 1.5px solid color-mix(in srgb, currentColor 32%, transparent);
+  line-height: 1.15;
+}
+/* Shown only beside the nav it divides; below 64rem it would be a lone dot
+   after the wordmark. */
+.tds-sitebar__divider {
+  display: none;
+  flex-shrink: 0;
+  width: 5px;
+  height: 5px;
+  margin-inline: 0.5rem;
+  background: var(--color-accent);
+}
+.tds-sitebar__nav,
+.tds-sitebar__desktop {
+  display: none;
+  align-items: center;
+}
+/* The first thing to yield when the row runs short: the contact CTA, which the
+   mobile sheet and every footer repeat. From 64rem to 80rem the journal's bar
+   carries five nav entries, the search field, the language switch, the theme
+   toggle and the account menu, and a CTA on top of that no longer fits. A
+   WRAPPER around the `.btn`, never a class on it — `.btn` declares its own
+   `display` and would win it back. */
+.tds-sitebar__wide {
+  display: none;
+  align-items: center;
+}
+.tds-sitebar__nav {
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 0.25rem;
+}
+.tds-sitebar__desktop {
+  gap: 0.5rem;
+}
+/* Always visible, pushed right: the account menu, the shop's basket and the
+   hamburger live here at every width. */
+.tds-sitebar__actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+}
+/* The journal's link voice, promoted: muted label, a 2px accent underline
+   that draws in on hover and stays under the current property. The underline
+   is absolutely positioned, so it never shifts the row. A `<button>` may wear
+   this class too (the journal's Entdecken) — the preflight already strips a
+   button's own fill and border. */
+.tds-sitebar__link {
+  position: relative;
+  padding: 0.5rem 0.8125rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--color-muted);
+  text-decoration: none;
+  transition: color var(--tds-dur-fast) var(--tds-ease-out);
+}
+.tds-sitebar__link::after {
+  content: "";
+  position: absolute;
+  left: 0.8125rem;
+  right: 0.8125rem;
+  bottom: 0.25rem;
+  height: 2px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--tds-dur-fast) var(--tds-ease-out);
+}
+.tds-sitebar__link:hover,
+.tds-sitebar__link:focus-visible {
+  color: var(--color-ink);
+}
+.tds-sitebar__link:hover::after,
+.tds-sitebar__link:focus-visible::after,
+.tds-sitebar__link[aria-current]::after {
+  transform: scaleX(1);
+}
+.tds-sitebar__link[aria-current] {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+@media (min-width: 64rem) {
+  .tds-sitebar__nav,
+  .tds-sitebar__desktop {
+    display: flex;
+  }
+  .tds-sitebar__divider {
+    display: block;
+  }
+}
+@media (min-width: 80rem) {
+  .tds-sitebar__wide {
+    display: flex;
+  }
+}
+/* Two islands instead of a bar ("nicht so standard"): the wordmark and the
+   property list in the start corner, everything the reader acts with — search,
+   language, theme, contact, account, basket — in the end corner, and the page
+   itself between them. Each site wraps its existing children in exactly two
+   of these; order and content stay as they were.
+
+   Below 64rem an island is `display: contents`, so the phone's first line
+   (logo left, account right) lays out exactly as without the wrappers. The
+   fill is `--tds-sitebar-fill` (the journal sets its soft tone there instead
+   of re-declaring the rule); the depth is the public surfaces' hard offset,
+   which is `none` everywhere else. No backdrop blur: the island is opaque,
+   so an offset shadow behind it can never show through as a dark plate. */
+.tds-sitebar__island {
+  display: contents;
+}
+@media (min-width: 64rem) {
+  .tds-sitebar {
+    gap: 1rem;
+  }
+  .tds-sitebar__island {
+    display: flex;
+    flex: 0 1 auto;
+    /* Both islands as tall as the taller one, whatever each carries. */
+    align-self: stretch;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    min-height: 2.75rem;
+    /* A 44px control (the CTA, a coarse-pointer link) keeps a frame of the
+       island's fill around it, wide enough for a button's own 3px hard
+       offset — at 0.25rem the tools site's sign-in button drew its shadow
+       over the island's edge. */
+    padding: 0.375rem 0.5rem 0.375rem 0.75rem;
+    background: var(--tds-sitebar-fill, var(--color-card));
+    border: 1px solid color-mix(in srgb, var(--color-primary) 14%, var(--color-line));
+    border-radius: var(--tds-radius-bar);
+    /* The header around the islands lets clicks through to the page. */
+    pointer-events: auto;
+  }
+  .tds-sitebar__island + .tds-sitebar__island {
+    margin-inline-start: auto;
+    padding-inline-start: 0.375rem;
+  }
+  .tds-sitebar__island .tds-sitebar__actions {
+    margin-inline-start: 0;
+  }
+  /* The hard offset is read only under the public surfaces, like every other
+     use of it (`none` anywhere else anyway). */
+  :is([data-surface="marketing"], [data-surface="blog"], [data-surface="panel"]) .tds-sitebar__island {
+    box-shadow: var(--tds-shadow-hard-sm);
+  }
+}
+/* A tablet in landscape gets the desktop nav with a finger: 44px targets, as
+   the library already gives buttons and fields at `pointer: coarse`. */
+@media (pointer: coarse) {
+  .tds-sitebar__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+}
+
+.brand-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  /* 92%, not the old 85%: "keine starke Glasoptik". The bar is meant to
+     read as a light floating surface with the page merely SUGGESTED
+     underneath it, not as a smoked-glass slab — at 85% the decoration
+     layer scrolling past was legible through the header and competed
+     with the nav labels. */
+  background: color-mix(in oklab, var(--color-paper) 92%, transparent);
+  /* CONTRACT: author `backdrop-filter` UNPREFIXED only — do not add
+     `-webkit-backdrop-filter` here. Consuming frontends minify with
+     lightningcss, which collapses a hand-authored pair down to the
+     `-webkit-` form alone, dropping the standard property and breaking
+     the blur in Firefox. Authoring just the standard property lets
+     lightningcss add the `-webkit-` prefix at build time — but only if
+     each consumer pins a Safari target via `vite.build.cssTarget` in its
+     astro.config (the minify step ignores `css.lightningcss.targets`).
+     Without that pin the prefix is never added and the blur breaks in
+     Safari <=17. See tds-landingpage commit e328ead and tds-shared#10. */
+  backdrop-filter: blur(14px);
+  /* A warm hairline rather than the old 2px navy-tinted rule: "sehr
+     dezente warme Kontur", and a 2px band under a translucent bar is the
+     heaviest thing on the page the moment the content behind it is
+     light. The brand colour now enters the header through the active
+     nav item and the wordmark, which is where it means something. */
+  border-bottom: 1px solid color-mix(in srgb, var(--color-primary) 14%, var(--color-line));
+}
+.brand-wordmark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+/* The display face is a grotesk, so the accent word reads as an upright
+   accent-coloured word rather than a serif italic. */
+.brand-wordmark .accent-italic {
+  font-style: normal;
+}

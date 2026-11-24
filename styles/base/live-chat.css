@@ -1,0 +1,327 @@
+/* === Live-Chat-CTA (floating support widget) ======================
+   The visitor bubble served by the live-chat-cta extension. `--lc-accent`
+   is set inline from the admin-configured brand colour. Uses --color-card /
+   -line / -ink / -muted so it follows light/dark like the rest of the base. */
+
+.live-chat-cta {
+  position: fixed;
+  right: 1.25rem;
+  /* Two offsets, then the home indicator:
+     - `--tds-bottom-lane` is the height of whatever else currently occupies the
+       bottom of the viewport — today the cookie notice, which measures itself
+       and publishes it. That notice spans the FULL width on a phone
+       (`inset-inline: 1rem`), so without this the launcher sat on top of it;
+       the toast stack has always read the lane and this element never did.
+     - `env(safe-area-inset-bottom)` clears the gesture bar on a notched phone
+       and resolves to 0px everywhere else.
+     The lane is named FIRST inside the calc on purpose — design.test.ts matches
+     `bottom:\s*calc\([^)]*--tds-bottom-lane`, and an `env()` ahead of it would
+     put a `)` inside that span and fail the assertion for a reason that looks
+     nothing like the change being made. */
+  bottom: calc(var(--tds-bottom-lane, 0px) + var(--tds-tabbar-lane, 0px) + 1.25rem + env(safe-area-inset-bottom, 0px));
+  z-index: 95;
+  font-family: var(--font-body);
+  --lc-accent: var(--color-surface-navy);
+}
+.live-chat-cta *,
+.live-chat-cta *::before,
+.live-chat-cta *::after {
+  box-sizing: border-box;
+}
+
+/* Launcher (closed) */
+.live-chat-cta--closed {
+  display: inline-flex;
+  align-items: flex-start;
+}
+.live-chat-cta__launcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.125rem;
+  border: none;
+  border-radius: 9999px;
+  background: var(--lc-accent);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+  /* Transform only. The shadow used to be transitioned alongside it, which
+     repaints a 28px blur every frame on an element the transform has already
+     promoted to its own layer — the most expensive way to express a 1px
+     lift. It is held at the hover value instead. */
+  transition: transform var(--tds-dur-fast) var(--tds-ease-out);
+}
+.live-chat-cta__launcher:hover {
+  transform: translateY(-1px);
+}
+.live-chat-cta__launcher-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+.live-chat-cta__hide {
+  margin-left: -0.5rem;
+  margin-top: -0.35rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1px solid var(--color-line);
+  border-radius: 9999px;
+  background: var(--color-card);
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--tds-dur-fast) var(--tds-ease-out),
+    border-color var(--tds-dur-fast) var(--tds-ease-out);
+}
+.live-chat-cta__hide:hover {
+  color: var(--color-ink);
+  border-color: var(--color-ink);
+}
+
+/* Panel (open) */
+.live-chat-cta--open {
+  display: flex;
+  flex-direction: column;
+  width: min(22rem, calc(100vw - 2rem));
+  /* `dvh`, not `vh`: on iOS `100vh` is the viewport with the URL bar
+     RETRACTED, so with the bar showing the panel is taller than the space it
+     has and its composer is pushed off the bottom of the screen. `.tds-modal`
+     has always used `dvh`; this predates it. */
+  max-height: min(34rem, calc(100dvh - 3rem));
+  border: 1px solid var(--color-line);
+  border-radius: 0.9rem;
+  background: var(--color-card);
+  color: var(--color-ink);
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+}
+.live-chat-cta__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--lc-accent);
+  color: #fff;
+}
+.live-chat-cta__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.live-chat-cta__close {
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity var(--tds-dur-fast) var(--tds-ease-out);
+}
+.live-chat-cta__close:hover {
+  opacity: 1;
+}
+/* The head is the accent fill, so the global accent-coloured focus ring
+   would sit invisible on it. White, inset. */
+.live-chat-cta__close:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.live-chat-cta__tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-line);
+}
+.live-chat-cta__tabs button {
+  flex: 1;
+  padding: 0.55rem 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color var(--tds-dur-fast) var(--tds-ease-out),
+    border-color var(--tds-dur-fast) var(--tds-ease-out);
+}
+.live-chat-cta__tabs button:hover {
+  color: var(--color-ink);
+}
+/* Inset so the ring is not clipped by the tab strip's own bottom border. */
+.live-chat-cta__tabs button:focus-visible {
+  outline-offset: -3px;
+}
+.live-chat-cta__tabs button.is-active {
+  color: var(--color-ink);
+  border-bottom-color: var(--lc-accent);
+}
+.live-chat-cta__body {
+  padding: 0.85rem 1rem;
+  overflow-y: auto;
+}
+.live-chat-cta__greeting {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.live-chat-cta__hint {
+  margin: 0 0 0.6rem;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+/* Inputs shared across panes */
+.live-chat-cta input,
+.live-chat-cta textarea {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0.5rem;
+  background: var(--color-paper, #fff);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 0.85rem;
+}
+.live-chat-cta button:not(.live-chat-cta__tabs button):not(.live-chat-cta__close):not(.live-chat-cta__hide):not(.live-chat-cta__back) {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: var(--lc-accent);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.live-chat-cta button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Chat */
+.live-chat-cta__messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 16rem;
+  overflow-y: auto;
+  margin-bottom: 0.6rem;
+}
+.live-chat-cta__msg {
+  max-width: 85%;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.6rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.live-chat-cta__msg--visitor {
+  align-self: flex-end;
+  background: var(--lc-accent);
+  color: #fff;
+}
+.live-chat-cta__msg--agent {
+  align-self: flex-start;
+  background: color-mix(in srgb, var(--color-muted) 18%, transparent);
+  color: var(--color-ink);
+}
+.live-chat-cta__compose {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+.live-chat-cta__compose textarea {
+  margin-bottom: 0;
+  resize: none;
+}
+
+/* FAQ / Docs */
+.live-chat-cta__faq,
+.live-chat-cta__docs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.live-chat-cta__faq > li,
+.live-chat-cta__docs > li {
+  border-bottom: 1px solid var(--color-line);
+}
+.live-chat-cta__faq > li > button,
+.live-chat-cta__docs > li > button {
+  width: 100%;
+  text-align: left;
+  padding: 0.6rem 0;
+  background: transparent;
+  border: none;
+  color: var(--color-ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--tds-dur-fast) var(--tds-ease-out);
+}
+.live-chat-cta__faq > li > button:hover,
+.live-chat-cta__docs > li > button:hover {
+  color: var(--lc-accent);
+}
+/* Full-bleed rows inside a 1rem-padded panel: the global 4px outline offset
+   would be clipped by the panel edge. */
+.live-chat-cta__faq > li > button:focus-visible,
+.live-chat-cta__docs > li > button:focus-visible {
+  outline-offset: -2px;
+}
+.live-chat-cta__faq-answer,
+.live-chat-cta__doc-body {
+  font-size: 0.83rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+  padding-bottom: 0.6rem;
+}
+.live-chat-cta__back {
+  background: transparent;
+  border: none;
+  color: var(--lc-accent);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0 0 0.4rem;
+  transition: opacity var(--tds-dur-fast) var(--tds-ease-out);
+}
+.live-chat-cta__back:hover {
+  opacity: 0.75;
+}
+.live-chat-cta__ok {
+  color: var(--color-success, #1a7f4b);
+  font-size: 0.85rem;
+}
+.live-chat-cta__err {
+  color: var(--color-danger, #b42318);
+  font-size: 0.8rem;
+  margin: 0 0 0.4rem;
+}
+
+/* Finger-sized hit areas for the widget's own chrome. These are the last
+   sub-44px controls in the library: the dismiss dot is 20px, the close glyph
+   is a bare font-size button with no box at all, and the tab strip is ~35px.
+   The dot and the close glyph grow the AREA and not the icon (negative
+   margins, the `.tds-toast__dismiss` pattern) so neither the launcher's
+   alignment nor the accent-filled head shifts. */
+@media (pointer: coarse) {
+  .live-chat-cta__hide {
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-left: -1.25rem;
+    margin-top: -1.1rem;
+  }
+  .live-chat-cta__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: -0.75rem -0.75rem -0.75rem 0;
+  }
+  .live-chat-cta__tabs button {
+    min-height: 44px;
+  }
+}

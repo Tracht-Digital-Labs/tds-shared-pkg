@@ -1,0 +1,168 @@
+/* === Dropdown menu =================================================
+   A button that opens a small panel of actions — the frontend host's
+   profile menu is the first consumer. Named `dropdown`, not `menu`,
+   because `.tds-menu-bar` is already the hamburger's three bars and the
+   two would read as one family.
+
+   Visibility is driven by `[hidden]` on the panel: the owning island keeps
+   the open state, and a hidden panel must stay unfocusable — which
+   `display: none` gives for free and an opacity/visibility fade does not. */
+.tds-dropdown {
+  position: relative;
+  display: inline-flex;
+}
+.tds-dropdown__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 14rem;
+  padding: 0.25rem 0.5rem;
+  border: var(--tds-border-hairline) solid transparent;
+  border-radius: var(--tds-radius-card);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--tds-dur-fast) var(--tds-ease-out),
+    border-color var(--tds-dur-fast) var(--tds-ease-out);
+}
+.tds-dropdown__trigger:hover,
+.tds-dropdown__trigger[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  border-color: var(--color-line);
+}
+.tds-dropdown__panel {
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  right: 0;
+  z-index: 50;
+  min-width: 14rem;
+  max-width: min(20rem, calc(100vw - 2rem));
+  padding: 0.375rem;
+  background: var(--color-card);
+  border: var(--tds-border-hairline) solid var(--color-line);
+  border-radius: var(--tds-radius-card);
+  box-shadow: var(--tds-shadow-md);
+}
+.tds-dropdown__panel[hidden] {
+  display: none;
+}
+/* Open/close. The panel is toggled with `hidden`, i.e. `display: none`, so
+   the exit needs `allow-discrete` to keep it on screen while it fades and the
+   entry needs `@starting-style` for a from-state — the same pair the modal
+   uses. CSS rather than Motion because the public sites' <AccountMenu> uses
+   this panel, and those pages should not load an animation runtime for one
+   dropdown. Older engines skip the block and keep the instant toggle. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (transition-behavior: allow-discrete) {
+    .tds-dropdown__panel {
+      transform-origin: top right;
+      transition:
+        opacity var(--tds-dur-fast) var(--tds-ease-out),
+        transform var(--tds-dur-fast) var(--tds-ease-out),
+        display var(--tds-dur-fast) allow-discrete;
+    }
+    .tds-dropdown__panel[hidden] {
+      opacity: 0;
+      transform: translateY(-0.25rem) scale(0.98);
+      /* Still painted for the length of the exit — it must not catch a click
+         meant for whatever is underneath. */
+      pointer-events: none;
+    }
+    @starting-style {
+      .tds-dropdown__panel:not([hidden]) {
+        opacity: 0;
+        transform: translateY(-0.25rem) scale(0.98);
+      }
+    }
+  }
+}
+/* Non-interactive header block (avatar + name + email). */
+.tds-dropdown__head {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.625rem 0.625rem;
+  min-width: 0;
+}
+.tds-dropdown__sep {
+  height: 1px;
+  margin: 0.25rem 0.375rem;
+  background: var(--color-line);
+  border: 0;
+}
+/* Section heading inside the panel (e.g. "Firma wechseln"). Deliberately not a
+   menu item — it carries no role and is never focusable, so arrow-key roving
+   walks straight past it. */
+.tds-dropdown__caption {
+  margin: 0;
+  padding: 0.375rem 0.625rem 0.25rem;
+  color: var(--color-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tds-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  /* 44px at EVERY pointer type, not just coarse: this is a menu row, and a
+     mouse user with a tremor deserves the same target a thumb gets. */
+  min-height: 44px;
+  padding: 0.5rem 0.625rem;
+  border: 0;
+  border-radius: var(--tds-radius-alert);
+  background: transparent;
+  color: var(--color-black);
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--tds-dur-fast) var(--tds-ease-out);
+}
+.tds-dropdown__item:hover,
+.tds-dropdown__item:focus-visible {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+/* `aria-checked` is the radio/checkbox spelling — a `menuitemradio` (the
+   company switcher) uses it, and it must read as selected exactly like an
+   `aria-current` link does. */
+.tds-dropdown__item[aria-current="true"],
+.tds-dropdown__item[aria-checked="true"] {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.tds-dropdown__item--danger {
+  color: var(--color-danger);
+}
+.tds-dropdown__item--danger:hover,
+.tds-dropdown__item--danger:focus-visible {
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+}
+.tds-dropdown__icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--color-muted);
+}
+.tds-dropdown__item--danger .tds-dropdown__icon {
+  color: inherit;
+}
+/* One-line truncation for a name/email too long for the panel. */
+.tds-dropdown__label {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tds-dropdown__trigger,
+  .tds-dropdown__item {
+    transition: none;
+  }
+}

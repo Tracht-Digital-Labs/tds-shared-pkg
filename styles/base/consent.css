@@ -1,0 +1,376 @@
+/* === Cookie / privacy notice ====================================== */
+/* Dismissible one-time notice (components/CookieNotice). Lives in
+   base.css — not app.css — because the landingpage imports only the
+   base stylesheet. Flat card on the elevated surface; the button uses
+   the fixed navy surface token so it never inverts in dark mode. */
+
+.cookie-notice {
+  position: fixed;
+  inset-inline: 1rem;
+  /* Same home-indicator clearance as the toast stack and the chat launcher.
+     The measured `--tds-bottom-lane` this element publishes is its HEIGHT,
+     not its offset, so raising it here keeps the toast stack sitting exactly
+     on top of it. */
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  z-index: 90;
+  margin-inline: auto;
+  max-width: 46rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  padding: 0.875rem 1.125rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0.75rem;
+  background: var(--color-card);
+  color: var(--color-ink);
+}
+.cookie-notice-text {
+  flex: 1 1 22rem;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+.cookie-notice-link {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--tds-dur-fast) var(--tds-ease-out);
+}
+.cookie-notice-link:hover {
+  color: var(--color-accent);
+}
+.cookie-notice-btn {
+  flex: none;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.5rem 1.125rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: var(--color-surface-navy);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color var(--tds-dur-fast) var(--tds-ease-out);
+}
+.cookie-notice-btn:hover {
+  background: color-mix(in srgb, var(--color-surface-navy) 88%, #fff);
+}
+/* Dark theme (2026-10-05): the navy button on the dark notice card measured
+   1.34:1 against it and read as a hole, not as the action. It takes the dark
+   theme's pastel pair, periwinkle and coral, with dark type. The ghost button
+   keeps its own rules below. */
+:is(:root, .tds-theme-preview__page)[data-theme="dark"] .cookie-notice-btn:not(.cookie-notice-btn--ghost):not(:where([data-theme="dark"] [data-theme="light"] *)) {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+:is(:root, .tds-theme-preview__page)[data-theme="dark"] .cookie-notice-btn:not(.cookie-notice-btn--ghost):hover:not(:where([data-theme="dark"] [data-theme="light"] *)) {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+/* Consent mode: an Accept + a secondary (ghost) Decline button side by side. */
+.cookie-notice-actions {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.cookie-notice-btn--ghost {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-line);
+}
+.cookie-notice-btn--ghost:hover {
+  background: color-mix(in srgb, var(--color-ink) 8%, transparent);
+}
+
+/* Phones: the notice hands the page back its first screen.
+   Measured on the landingpage before this block existed: 207px tall at 320px —
+   the tallest thing on the first screen, lying on top of the page's primary
+   call to action — and at 400 % zoom (a 320×256 viewport) header, notice and a
+   floating button left under a tenth of the page visible. The notice states
+   one fact, so it can take far less room: tighter padding, a smaller line, and
+   the button BESIDE the text wherever a narrow text column still fits.
+   `max-height` + scroll is the floor for the extreme zoom case, where even the
+   compact notice would otherwise outgrow the viewport it is informing about.
+   The consent mode keeps its action row on a line of its own: three equal
+   decisions squeezed beside a text column stop looking equal.
+   No lane here on purpose: this element PUBLISHES `--tds-bottom-lane`, it does
+   not read it. */
+@media (max-width: 40rem) {
+  .cookie-notice {
+    inset-inline: 0.5rem;
+    bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.5rem 0.75rem;
+    padding: 0.625rem 0.75rem;
+    max-height: 40svh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .cookie-notice-text {
+    flex: 1 1 9rem;
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+  /* The three decisions share one row on a phone too (2026-11-03, asked
+     for): equal widths, a smaller label, no wrap. Only the narrowest screens
+     (below 22rem) let them wrap again. */
+  .cookie-notice-actions {
+    flex-basis: 100%;
+    flex-wrap: nowrap;
+    gap: 0.375rem;
+  }
+  .cookie-notice-actions .cookie-notice-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    text-align: center;
+  }
+}
+@media (max-width: 22rem) {
+  .cookie-notice-actions {
+    flex-wrap: wrap;
+  }
+}
+
+/* === Consent manager ==============================================
+   The second layer and its satellites (src/consent). The FIRST layer
+   reuses `.cookie-notice` above unchanged — it is the same object in
+   the same place, so a second block for it would be a second truth
+   about one bar.
+
+   Everything here is token-driven, so the flat surfaces (blog, shop,
+   tools) get square corners and the marketing surface gets its pills
+   without a per-surface fork. Do not hand-author a radius here. */
+
+/* The footer's way back in. A <button> that reads as a link — the look
+   is a look; the element is what it does. */
+.consent-link {
+  font: inherit;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.consent-link:hover {
+  color: var(--color-accent);
+}
+
+/* --- the settings dialog ---------------------------------------- */
+/* Geometry comes from `.tds-modal` in primitives.css; only the inner
+   rhythm is set here. The panel is capped and scrolls internally: four
+   purposes with their explanations is taller than a phone in landscape,
+   and a dialog whose actions sit below the fold is a dialog whose
+   reject button cannot be found. */
+/* Wide enough that the three decisions share one row (0.64.14; the marketing
+   surface had it since 0.64.5). `.tds-modal` alone is 28rem. */
+.tds-modal.consent-dialog {
+  width: min(100% - 2rem, 38rem);
+}
+.consent-dialog__panel {
+  container-type: inline-size;
+  max-width: none;
+  max-height: min(80vh, 44rem);
+  overflow-y: auto;
+  /* Never sideways (2026-11-03). `overflow-y: auto` turns the x axis into
+     `auto` as well, and the close button's quarter turn on hover pokes its
+     corners past the panel's edge mid-turn: a horizontal scrollbar appeared
+     for the length of the turn and the whole dialog jumped. */
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+/* Top-right close. Sits in the panel's padding rather than in the flow,
+   so the heading keeps the full measure; the panel is position:relative
+   via .tds-modal__panel in primitives.css. 44px square for WCAG 2.5.8 —
+   a 16px glyph with a 14px hit area is the classic failing close button. */
+.consent-dialog__close {
+  position: absolute;
+  top: 0.25rem;
+  inset-inline-end: 0.25rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  line-height: 1;
+  border: 0;
+  border-radius: var(--tds-radius-btn);
+  /* The panel's own background (0.64.16): the button stays where it is while
+     the purposes scroll, and text passing under it must not show through.
+     Unscrolled it is the colour already behind it. */
+  background: inherit;
+  z-index: 2;
+  /* Concentric with the panel's corner, 0.25rem in: a square background
+     would paint over the panel's rounding. */
+  border-start-end-radius: max(var(--tds-radius-btn), calc(var(--tds-radius-card) - 0.25rem));
+  color: var(--color-muted);
+  cursor: pointer;
+}
+.consent-dialog__close:hover {
+  color: var(--color-ink);
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--color-ink) 8%, transparent),
+    color-mix(in srgb, var(--color-ink) 8%, transparent)
+  );
+}
+
+/* Above the close button's patch (0.64.16), so the heading's focus ring, which
+   runs the full width, is drawn over it as it always was. */
+.consent-dialog__panel .tds-modal__title {
+  position: relative;
+  z-index: 3;
+}
+.consent-dialog__intro {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+.consent-dialog__list {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.875rem;
+}
+.consent-dialog__links {
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+}
+.consent-dialog__links a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+/* One row of three equal buttons where the panel is wide enough; stacked,
+   the considered action first, on a narrow phone. Wrapping (the old
+   behaviour) pushed "Auswahl speichern" alone onto a second line, below the
+   panel's edge on every page without the marketing surface (0.64.14). */
+.consent-dialog__actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  /* Always in view (0.64.15): the purposes and their explanations are often
+     taller than the panel (three purposes on the blog, every phone), and a
+     decision that has to be scrolled to is one that gets missed. The row
+     sticks to the panel's bottom edge and carries the panel's own background
+     out to its edges, so the text scrolls underneath it. The negative margins
+     and matching padding leave the layout exactly as it was when nothing
+     scrolls. */
+  position: sticky;
+  bottom: calc(-1 * var(--consent-pad-b, 1.25rem));
+  z-index: 1;
+  margin: 0 calc(-1 * var(--consent-pad-x, 1.25rem)) calc(-1 * var(--consent-pad-b, 1.25rem));
+  padding: 0.75rem var(--consent-pad-x, 1.25rem) var(--consent-pad-b, 1.25rem);
+  background: inherit;
+  box-shadow: 0 -1px 0 var(--color-line);
+}
+.consent-dialog__actions .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
+  padding-inline: 0.875rem;
+  white-space: nowrap;
+}
+@container (max-width: 27rem) {
+  .consent-dialog__actions {
+    flex-direction: column-reverse;
+  }
+  .consent-dialog__actions .btn {
+    flex: none;
+    width: 100%;
+  }
+}
+
+/* --- one purpose ------------------------------------------------- */
+.consent-row {
+  padding: 0.75rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--tds-radius-card);
+  background: var(--color-card);
+}
+.consent-row__head {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  /* The whole row is the label, so the hit area is the row and not a
+     14px box — WCAG 2.5.8 target size, and the reason nobody misses it
+     on a phone. */
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+.consent-row__input {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+/* `necessary` is checked and disabled. It is dimmed only slightly: the
+   browser's own disabled rendering plus a heavy dim would read as
+   "broken" rather than "not yours to decide", and the badge beside it
+   already says which. */
+.consent-row__input:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+.consent-row__label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-ink);
+}
+.consent-row__badge {
+  margin-inline-start: auto;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.consent-row__desc {
+  margin: 0.375rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+/* --- click-to-load gate ------------------------------------------ */
+/* Sits where the embed would be, at the embed's own width. No fixed
+   height: the card is shorter than most videos, and reserving the
+   video's box would leave a hole under the buttons on a phone. */
+.consent-placeholder {
+  display: grid;
+  gap: 0.625rem;
+  justify-items: start;
+  padding: 1.25rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--tds-radius-card);
+  background: var(--tds-flat-tint, var(--color-soft));
+}
+.consent-placeholder__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.consent-placeholder__body {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+  max-width: var(--tds-measure, 65ch);
+}
+.consent-placeholder__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

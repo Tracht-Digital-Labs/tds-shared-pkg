@@ -8,7 +8,8 @@
  * files, so every ordinary gate in this repo is blind to them. What is not
  * blind is a consumer's deploy: drop them from `files` and every panel product
  * fails its postbuild with a bare MODULE_NOT_FOUND naming a path inside
- * node_modules, a long way from this package.
+ * node_modules, a long way from this package. What the script does is
+ * `packRelease.test.ts`; this file holds what ships.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -23,34 +24,10 @@ describe("release scripts", () => {
     expect(pkg.files).toContain("scripts");
   });
 
-  it("ships both halves of the spine", () => {
-    expect(existsSync(join(root, "scripts/pack-release.mjs"))).toBe(true);
-    expect(existsSync(join(root, "scripts/app.cjs"))).toBe(true);
-  });
-
-  it("resolves the project root from the CONSUMER's cwd", () => {
-    // Deriving it from `import.meta.url` — which is what the per-site copies
-    // did — resolves to `node_modules/@tracht-digital-labs/` once the
-    // script is published, so it would read tds-shared's own package.json and
-    // report a missing `tds.release` section for a consumer that has one.
-    const src = read("scripts/pack-release.mjs");
-    expect(src).toMatch(/const root = process\.cwd\(\)/);
-    expect(src).not.toMatch(/const root = resolve\(dirname\(fileURLToPath/);
-  });
-
-  it("falls back to the packaged startup file when the consumer has none", () => {
-    // The panel products are composition repos with no application source at
-    // all — no `src/`, and no `app.cjs` either. The three public sites keep
-    // theirs, so the lookup has to try the consumer first.
-    const src = read("scripts/pack-release.mjs");
-    expect(src).toMatch(/existsSync\(join\(root, "app\.cjs"\)\)/);
-    expect(src).toMatch(/fileURLToPath\(new URL\("app\.cjs", import\.meta\.url\)\)/);
-  });
-
-  it("ships a changing Passenger restart signal with every release tree", () => {
-    const src = read("scripts/pack-release.mjs");
-    expect(src).toContain('join(out, "tmp", "restart.txt")');
-    expect(src).toContain("new Date().toISOString()");
+  it("ships every file of the spine", () => {
+    for (const file of ["scripts/pack-release.mjs", "scripts/release/verify.mjs", "scripts/app.cjs"]) {
+      expect(existsSync(join(root, file)), file).toBe(true);
+    }
   });
 
   it("keeps the startup file CommonJS", () => {

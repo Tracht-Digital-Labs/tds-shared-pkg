@@ -1,0 +1,44 @@
+/* === Motion preferences =========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* The clamp above only shortens time. Three things it cannot reach, each
+     of which is a separate failure: */
+
+  /* 1. Smooth scrolling is neither a transition nor an animation, so the
+        clamp never touched it (WCAG 2.3.3). */
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* 2. END STATES. A clamped transition still ARRIVES at its target — so
+        every hover-lift below still happened, it just snapped there in
+        0.01ms, which is worse than not lifting at all. Duration alone is
+        not a reduced-motion implementation; the movement has to not occur.
+        (app.css does the same for the panel's cards and widgets, which are
+        the only ones it can see from there.) */
+  .btn-primary:hover,
+  .btn-accent:hover,
+  .btn:active,
+  .live-chat-cta__launcher:hover {
+    transform: none;
+  }
+
+  /* 3. The spinner is the one indicator that must survive the clamp: it
+        still means "working". Frozen mid-rotation it reads as a broken ring
+        with one dark quarter, so flatten it to an even circle — present and
+        legible, but not a stopped animation. */
+  .tds-spinner {
+    border-color: color-mix(in srgb, currentColor 35%, transparent);
+  }
+  .tds-spinner--primary {
+    border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  }
+}

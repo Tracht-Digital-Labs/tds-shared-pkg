@@ -16,6 +16,9 @@
   surfaces nest (the blog-CMS preview renders `data-surface="blog"` inside the panel).
 - **The geometry scale is a plain `:root` block, not `@theme inline`** (which bakes literal values into utilities and
   can't be overridden by a surface). Colours and fonts stay in `@theme inline`.
+- **`base.css`, `primitives.css`, `app.css` and `app-shell.css` only import partials** from the folder of the same
+  name, in cascade order. A new rule goes into the partial for its concern, never appended to the entry; a new
+  partial is imported at the place in the order where its rules belong. Consumers import the entries only.
 - **In `app.css`, scope rules on generic primitives** (`.tds-card`, `.tds-widget`, `.tds-page__title`) to
   `[data-surface="panel"]`; the blog imports this file. Panel-only names stay unscoped.
 

@@ -1,0 +1,165 @@
+/* ---- Bottom sheet ----
+   A <dialog> opened with showModal(). Tailwind's preflight resets
+   `margin: auto` on dialog, so the position is spelled out in full here —
+   never rely on the UA default (the "dialog top-left" trap). */
+dialog.tds-sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  width: 100%;
+  max-width: 40rem;
+  max-height: min(85dvh, 100% - 2.5rem);
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  overscroll-behavior: contain;
+}
+dialog.tds-sheet[open] { display: flex; }
+dialog.tds-sheet::backdrop {
+  background: rgb(10 14 30 / 0.45);
+}
+@media (prefers-reduced-motion: no-preference) {
+  dialog.tds-sheet[open] {
+    animation: tds-sheet-in var(--tds-dur-base, 240ms) var(--tds-ease-out, ease-out);
+  }
+  dialog.tds-sheet[open]::backdrop {
+    animation: tds-sheet-fade var(--tds-dur-base, 240ms) ease-out;
+  }
+}
+/* A sheet comes in from the side its tab sits on (`data-from`, set by
+   `mountSheet` from the trigger's position in the bar): a tab on the left
+   swipes in from the left, one on the right from the right — the bar reads as
+   a row of places, and each one opens where it is. */
+@media (prefers-reduced-motion: no-preference) {
+  dialog.tds-sheet[open][data-from="left"] {
+    animation: tds-sheet-in-left var(--tds-dur-base, 240ms) var(--tds-ease-out, ease-out);
+  }
+  dialog.tds-sheet[open][data-from="right"] {
+    animation: tds-sheet-in-right var(--tds-dur-base, 240ms) var(--tds-ease-out, ease-out);
+  }
+}
+dialog.tds-sheet.is-closing[data-from="left"] { transform: translateX(-100%); }
+dialog.tds-sheet.is-closing[data-from="right"] { transform: translateX(100%); }
+dialog.tds-sheet.is-dragging { transition: none; }
+dialog.tds-sheet.is-closing {
+  transition: transform var(--tds-dur-fast, 160ms) ease-in;
+  transform: translateY(100%);
+}
+.tds-sheet__grab {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem 0.5rem;
+  touch-action: none;
+  cursor: grab;
+}
+.tds-sheet__grab::before {
+  content: "";
+  position: absolute;
+  top: 0.4rem;
+  left: 50%;
+  width: 2.5rem;
+  height: 4px;
+  margin-left: -1.25rem;
+  background: var(--color-line);
+}
+.tds-sheet__title {
+  margin: 0.375rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  font-weight: 800;
+}
+.tds-sheet__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-top: 0.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+.tds-sheet__close:hover { color: var(--color-ink); }
+.tds-sheet__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.25rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Rows inside a sheet: full-width, thumb-sized. */
+.tds-sheet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3rem;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-ink);
+  text-decoration: none;
+  font-weight: 500;
+}
+.tds-sheet-row:last-child { border-bottom: 0; }
+.tds-sheet-heading {
+  margin: 1rem 0 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* A segmented control (theme, language, text size) — three or four equal
+   choices in one row, the selected one filled. */
+.tds-segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 2px;
+  padding: 2px;
+  background: var(--color-soft);
+}
+.tds-segmented > :is(button, a) {
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.tds-segmented > :is([aria-pressed="true"], [aria-current="true"], [aria-current="page"]) {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow: inset 0 -2px 0 var(--color-accent);
+}
+
+@keyframes tds-sheet-in {
+  from { transform: translateY(100%); }
+}
+@keyframes tds-sheet-in-left {
+  from { transform: translateX(-100%); }
+}
+@keyframes tds-sheet-in-right {
+  from { transform: translateX(100%); }
+}
+@keyframes tds-sheet-fade {
+  from { opacity: 0; }
+}

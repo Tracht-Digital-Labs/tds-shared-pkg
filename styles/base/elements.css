@@ -1,0 +1,136 @@
+/* WebKit / Blink scrollbar — slender, brand-tinted, with a transparent
+   track. The 3px transparent border + padding-box background-clip trick
+   shrinks the thumb visually inside the 10px channel so the bar reads as
+   a 4px pill instead of a heavy slab. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 9999px;
+  transition: background-color var(--tds-dur-base) var(--tds-ease-out);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-primary);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--color-accent);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Touch devices typically hide their own scrollbar already; nothing
+   to do beyond letting the OS handle it. */
+@media (pointer: coarse) {
+  html {
+    scrollbar-width: none;
+  }
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* NOTE: no `border-radius` here — a radius on the *element* (not the
+   outline) squashed every rounded control the moment it received focus
+   (text inputs get :focus-visible on plain click-focus). Outlines follow
+   the element's own border-radius in all supported browsers. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* FIELDS ANSWER FOCUS WITH THEIR SHADOW, NOT WITH A RING (2026-10-09).
+   A field is pressed into the page (`--tds-shadow-inset`); on focus the well
+   deepens to 3px and takes the focus colour, and the ring around it goes.
+   That colour change IS the indicator — a 3px L in bordeaux on a card is
+   9:1, well above 2.4.11's 3:1 — so this rule carries both halves at once:
+   nothing may hide the ring without also drawing the well.
+
+   `outline-color: transparent`, never `outline: none`: in forced-colors mode
+   the system repaints a transparent outline in its own colour, so a Windows
+   high-contrast user still gets a ring where the shadow is stripped.
+
+   High specificity on purpose ((0,3,1)): a consumer's `.x { box-shadow }`
+   would otherwise remove the well and leave a focused field with NO
+   indicator. The underline `.field` and switches built on a hidden checkbox
+   draw their own (primitives.css, and the consumer's track rule).
+   `--tds-focus-ink` is re-pointed by the dark tones, where bordeaux sinks. */
+:is(
+    input:not(
+        [type="button"],
+        [type="submit"],
+        [type="reset"],
+        [type="image"],
+        [type="range"],
+        [type="color"],
+        [type="file"],
+        [type="hidden"],
+        [type="checkbox"],
+        [type="radio"]
+      ),
+    select,
+    textarea
+  ):not(.field):focus-visible {
+  outline-color: transparent;
+  box-shadow: inset 3px 3px 0 0 var(--tds-focus-ink, var(--color-accent));
+}
+/* Checkbox and radio: same well, same colour change. A checked box is filled
+   navy, where bordeaux would vanish (1.3:1), so the checked well takes coral. */
+:is(input[type="checkbox"], input[type="radio"]):focus-visible {
+  outline-color: transparent;
+  box-shadow: inset 3px 3px 0 0 var(--tds-focus-ink, var(--color-accent));
+}
+:is(input[type="checkbox"], input[type="radio"]):checked:focus-visible {
+  box-shadow: inset 3px 3px 0 0 var(--color-accent-pink);
+}
+
+/* Checkboxes and radios were the last unbranded control in the system: every
+   settings form in the panel — and there are dozens across the thirteen
+   extensions — rendered the operating system's blue tick next to carefully
+   styled `.field` inputs. This tint was the first answer.
+
+   IT IS NO LONGER THE WHOLE ANSWER, and the argument that used to stand here
+   ("`accent-color` rather than `appearance: none`, because re-implementing the
+   control means re-implementing its every state") was overtaken on 2026-09-28:
+   `primitives.css` now does exactly that, box, tick, focus ring and well
+   included, so that a checkbox is pressed into the page like every other
+   control. Read that block for the current shape of the control.
+
+   What survives here is the tint for the states the custom box does not paint:
+   `:indeterminate` (which has no `::before` of its own) and any consumer that
+   re-declares `appearance: auto` on a control of its own. Both fall back to the
+   native rendering, and a native rendering should still be brand-coloured.
+
+   It follows `--tds-panel-accent` (declared in the `:root` scale below as
+   `--color-primary`, so it resolves to the brand navy on the marketing and
+   blog surfaces too) — which means a tick in the management frontend is
+   burgundy, matching the surface it sits on. */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--tds-panel-accent);
+}

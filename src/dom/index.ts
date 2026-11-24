@@ -25,8 +25,8 @@
  */
 
 import { translations, type Language } from "../i18n/translations";
-import { onThemeChange } from "../theme/index.js";
-import { attachThemeToggle, currentTheme, MOON_PATH, SUN_RAYS } from "../theme/toggle.js";
+import { currentTheme, onThemeChange } from "../theme/index.js";
+import { attachThemeToggle, MOON_PATH, SUN_RAYS } from "../theme/toggle.js";
 import { openConsentSettings } from "../consent/store.js";
 
 const escapeAttr = (value: string): string =>

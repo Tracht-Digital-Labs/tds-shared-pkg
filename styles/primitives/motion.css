@@ -1,0 +1,218 @@
+/* === Motion: something arriving ==================================== */
+
+/* An element that appears as the ANSWER to an action — a generated QR code, a
+   compressed file, a formatted JSON — fades and lifts into place instead of
+   popping. Pure CSS: `@starting-style` gives the freshly inserted element a
+   from-state, so there is no script, no bundle cost and nothing to hydrate.
+   That is what the public tools need; the panels use `motion/react`.
+
+   Only on INSERTION. An element whose content merely changes does not
+   re-animate — which is right: the first answer arrives, later ones update.
+   Engines without `@starting-style` skip the block and show the element at
+   once, as do visitors who asked for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (transition-behavior: allow-discrete) {
+    .tds-appear {
+      transition:
+        opacity var(--tds-dur-base) var(--tds-ease-out),
+        transform var(--tds-dur-base) var(--tds-ease-out);
+    }
+    @starting-style {
+      .tds-appear {
+        opacity: 0;
+        transform: translateY(0.375rem);
+      }
+    }
+  }
+}
+
+/* === Motion: list transitions (transitionUpdate) =================== */
+
+/* `transitionUpdate()` from `./motion` runs a DOM update as a same-document
+   View Transition. An element marked `.tds-vt-item` with a unique
+   `--tds-vt-name` then glides to its new place (or fades in/out); the names
+   are only live while `<html>` carries `.tds-vt-list`, which the helper sets
+   for the length of the transition — named permanently, the same elements
+   would also morph through every cross-page transition. */
+.tds-vt-list .tds-vt-item {
+  view-transition-name: var(--tds-vt-name);
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:active-view-transition-type(list)::view-transition-group(*) {
+    animation-duration: var(--tds-dur-slow);
+    animation-timing-function: var(--tds-ease-out);
+  }
+  :root:active-view-transition-type(list)::view-transition-old(*),
+  :root:active-view-transition-type(list)::view-transition-new(*) {
+    animation-duration: var(--tds-dur-base);
+    animation-timing-function: var(--tds-ease-out);
+  }
+}
+
+/* === Motion: tabs, disclosure, reveal ============================== */
+
+/* The gliding marker under the active tab. Rendered by <TabIndicator> from
+   `motion/react`, which moves it between tabs with a shared `layoutId`; this
+   rule only draws it. The tabs in the library are chips, so it sits INSIDE
+   the chip's bottom edge in `currentColor` — right for every chip variant
+   without knowing which one the active tab uses. The owning tab needs
+   `position: relative` (`.tds-tab` below gives it that). */
+.tds-tab {
+  position: relative;
+}
+.tds-tab-indicator {
+  position: absolute;
+  inset-inline: 0.625rem;
+  bottom: 0.1875rem;
+  height: 2px;
+  border-radius: var(--tds-radius-pill);
+  background: currentColor;
+  pointer-events: none;
+}
+
+/* A `<details>` that opens by growing instead of snapping. `::details-content`
+   is the box the browser wraps everything after `<summary>` in, and
+   `interpolate-size` lets `block-size` transition to `auto`. It is inherited,
+   so declaring it here scopes the switch to disclosures instead of flipping it
+   for the whole document. Engines without either feature skip the block and
+   keep the instant open. Promoted from the landingpage FAQ, which had the only
+   copy. */
+/* Since 0.65 every `<details>` grows this way (quality-of-life pass); the class
+   stays for markup that already names it. `data-snap` opts one out, e.g. a
+   details whose content is an absolutely positioned menu. */
+.tds-disclosure,
+:where(details:not([data-snap])) {
+  interpolate-size: allow-keywords;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports selector(::details-content) {
+    .tds-disclosure::details-content,
+    :where(details:not([data-snap]))::details-content {
+      block-size: 0;
+      overflow: clip;
+      opacity: 0;
+      transition:
+        block-size var(--tds-dur-slow) var(--tds-ease-out),
+        opacity var(--tds-dur-base) var(--tds-ease-out),
+        content-visibility var(--tds-dur-slow) allow-discrete;
+    }
+    .tds-disclosure[open]::details-content,
+    :where(details[open]:not([data-snap]))::details-content {
+      block-size: auto;
+      opacity: 1;
+    }
+  }
+}
+
+/* === Quality-of-life motion (0.65) =================================
+   Small answers to the visitor's own actions, on every site and panel. None
+   of it is decoration: nothing moves unless something was pressed, opened or
+   jumped to, nothing ships hidden, and every rule sits at zero specificity
+   (`:where`) so a component's own transition or transform always wins.
+
+   1. PRESS. Any button-like control that is not a `.btn` (which has its own
+      press scale) dips slightly while held. It uses the independent `scale`
+      property, so it composes with whatever `transform` the control already
+      has instead of replacing it. `data-press="off"` opts out. */
+@media (prefers-reduced-motion: no-preference) {
+  :where(
+      button:not(.btn),
+      [role="button"]:not(.btn),
+      [role="tab"],
+      summary,
+      label:has(> input[type="checkbox"], > input[type="radio"]),
+      .tds-tile,
+      .tds-dropdown__item
+    ):where(:not(:disabled, [aria-disabled="true"], [aria-busy="true"], [data-press="off"])) {
+    transition-property: scale, color, background-color, border-color, opacity;
+    transition-duration: var(--tds-dur-fast);
+    transition-timing-function: var(--tds-ease-out);
+  }
+  :where(
+      button:not(.btn),
+      [role="button"]:not(.btn),
+      [role="tab"],
+      summary,
+      .tds-tile,
+      .tds-dropdown__item
+    ):where(:not(:disabled, [aria-disabled="true"], [aria-busy="true"], [data-press="off"])):active {
+    scale: 0.97;
+  }
+
+  /* 2. LINKS. Colour and underline ease instead of flipping on hover. */
+  :where(a) {
+    transition:
+      color var(--tds-dur-fast) var(--tds-ease-out),
+      text-decoration-color var(--tds-dur-fast) var(--tds-ease-out);
+  }
+
+  /* 3. ARRIVAL. A heading reached through an in-page link (table of
+        contents, "jump to" links, a shared `#anchor` URL) lights up once, so
+        the eye finds where the page landed. Background only, no movement. */
+  :where(h1, h2, h3, h4, [data-target-flash]):target {
+    animation: tds-target-flash var(--tds-dur-draw) var(--tds-ease-out) 1;
+  }
+}
+@keyframes tds-target-flash {
+  from {
+    background-color: color-mix(in srgb, var(--color-accent, currentColor) 18%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+/* === Microinteractions (0.66) ======================================
+   The second quality-of-life batch. Same contract as above: zero
+   specificity, reduced motion turns every one of them off, nothing ships
+   hidden, and nothing runs unless the visitor did something.
+
+   4. FOCUS. The keyboard focus ring settles in from a wider offset instead
+      of popping. A single `from` keyframe animates to whatever outline the
+      control already declares, so no component loses its own ring.
+   5. FIELDS. Border and background ease when a field turns valid, invalid
+      or focused (the shake on refusal stays with `errorBounceScript`).
+   6. TICKS. A checkbox or radio dips while pressed, like a button.
+   7. CONFIRM. `data-copied` or `data-done` on a control pulses it once in
+      the success colour: "copied", "saved", "sent". Set it from JS for the
+      confirmation's lifetime (`flagConfirmed()` in `./motion/dom`). */
+@media (prefers-reduced-motion: no-preference) {
+  :where(:focus-visible) {
+    animation: tds-focus-in var(--tds-dur-fast) var(--tds-ease-out) 1;
+  }
+
+  :where(input:not([type="checkbox"], [type="radio"], [type="range"]), textarea, select) {
+    transition:
+      border-color var(--tds-dur-fast) var(--tds-ease-out),
+      background-color var(--tds-dur-fast) var(--tds-ease-out);
+  }
+
+  :where(input[type="checkbox"], input[type="radio"]):where(:not(:disabled)) {
+    transition: scale var(--tds-dur-fast) var(--tds-ease-out);
+  }
+  :where(input[type="checkbox"], input[type="radio"]):where(:not(:disabled)):active {
+    scale: 0.9;
+  }
+
+  :where([data-copied], [data-done]) {
+    animation: tds-confirm var(--tds-dur-bounce) var(--tds-ease-bounce-in) 1;
+  }
+}
+@keyframes tds-focus-in {
+  from {
+    outline-offset: 6px;
+    outline-color: transparent;
+  }
+}
+@keyframes tds-confirm {
+  0% {
+    scale: 1;
+  }
+  40% {
+    scale: 1.06;
+    color: var(--color-success-ink, currentColor);
+  }
+  100% {
+    scale: 1;
+  }
+}

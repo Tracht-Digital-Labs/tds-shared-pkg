@@ -2,6 +2,10 @@
 
 `npm run test:run` runs the vitest suite in `src/__tests__/`.
 
+CI runs Node 22. On Node 25 or later the built-in `localStorage` global shadows jsdom's and every
+component suite fails with `Cannot read properties of undefined (reading 'clear')`; run
+`NODE_OPTIONS=--no-experimental-webstorage npm run test:run` there.
+
 ## `design.test.ts` guards the CSS contracts
 
 Every failure mode in the design system is silent in a browser (a missing token resolves to nothing, an unknown variant
@@ -10,6 +14,11 @@ hairline vs separator; flat fill counterparts; shadow scoping; the panel base ac
 contrast of text roles through the real token chain; toast variants; `.tds-modal` without `z-index` / `position: fixed`;
 no `outline: none` in `:focus`; lane publishers set and clear; durations from tokens; no token names with digits.
 
+Read a stylesheet with `readStylesheet(entry)` from `__tests__/stylesheet.ts`, never `readFileSync`: the four large
+entries hold only `@import`s, so a raw read finds nothing, and an assertion that loops over matches passes without
+checking anything. `stylesheets.test.ts` holds the entry shape: imports only, every partial imported once, no
+partial importing further.
+
 ## Other suites worth knowing
 
 | Suite | Covers |
@@ -17,10 +26,13 @@ no `outline: none` in `:focus`; lane publishers set and clear; durations from to
 | `motionReact.test.tsx` | Each motion primitive renders to a string without `opacity:0`; no static `motion` import in `./components` |
 | `api.test.ts` | Cross-entry transport state; runtime config resolution |
 | `installer.test.ts`, `installChecks.test.ts` | Profiles, no key in generated config, list/map counting, reachability wording |
-| `releaseScripts.test.ts` | `scripts` is in `files` |
+| `releaseScripts.test.ts` | `scripts` is in `files`, every spine file exists, `app.cjs` stays CommonJS |
+| `geoAudit.test.ts` | Runs the `tds-geo-audit` bin against a site served in-process: a clean site passes, a broken one is held as a snapshot naming every failure and warning. Mutation check: 20 breakages, 20 caught |
+| `packRelease.test.ts` | Runs `pack-release.mjs` against a fake `dist/`: tree layout, startup-file fallback, release stamp, build gate by the runtime formula, refusals, and every import-scan rule. Mutation check: 24 breakages, 23 caught (the `satori` exemption needs an `npm install`) |
 | `PostCover.test.tsx` | No bare `var(--tds-flat-tint)` |
 | `AccountMenu.test.tsx` | Absolute auth origin for writes, DELETE logout, hint keys |
-| `prefs.test.ts` | Bottom-fixed elements add `--tds-tabbar-lane` |
+| `prefs.test.ts` | Bottom-fixed elements add `--tds-tabbar-lane` (and at least one such element exists) |
+| `cache/pageCache.test.ts` | Middleware hit/miss/304/HEAD/refresh and every bypass rule; control-plane auth, errors, purge, rebuild outcomes and concurrency. Mutation check: 19 breakages, 19 caught |
 | `LiveChatCta.test.tsx` | See below |
 
 ## `vi.stubGlobal` is not undone by `vi.restoreAllMocks()`

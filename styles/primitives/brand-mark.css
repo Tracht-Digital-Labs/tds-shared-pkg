@@ -1,0 +1,42 @@
+/* === Brand logomark =============================================== */
+
+/* The TD mark, drawn as a CSS mask over a colour token rather than as an
+   <img>. That is what makes dark mode free: the landingpage ships the mark
+   as two raster images and inverts them with `filter: brightness(0)
+   invert(1)`, which is a hack that only survives because the mark is
+   monochrome. Here the element IS the colour and the asset is only a shape.
+   `--inverse` is for a fixed-dark ground (a navy footer), where the page's
+   ink token would disappear.
+
+   The ASSET stays app-local — tds-shared cannot serve a `public/`-rooted
+   URL — so each consumer points `--tds-brand-logo-mask` at its own copy:
+
+     :root { --tds-brand-logo-mask: url("/brand/td-logomark.webp"); }
+
+   `--tds-brand-logo-ratio` defaults to the real aspect of the shipped asset
+   (713x483 => 1.476). It matters because the mask is `contain`-fitted: a box
+   whose ratio does not match the art letterboxes the mark and renders it
+   SMALLER than the space it occupies, with nothing anywhere to say so.
+   (tds-blog-frontend's local copy of this rule, which this promotion
+   replaces, declares a portrait 0.885 box for the same landscape asset and
+   has been rendering the mark undersized ever since. Fixing that is a blog
+   change, not this one.) */
+.brand-logo {
+  display: inline-block;
+  flex-shrink: 0;
+  height: var(--tds-brand-logo-size, 1.4em);
+  width: calc(var(--tds-brand-logo-size, 1.4em) * var(--tds-brand-logo-ratio, 1.476));
+  background-color: var(--color-primary);
+  /* Unprefixed ONLY — the same contract as `backdrop-filter` on
+     `.brand-header` above, and for the same reason: lightningcss collapses a
+     hand-authored prefix pair down to the `-webkit-` form and drops the
+     standard property, which would leave Firefox with no mask and therefore
+     a solid navy rectangle where the mark should be. Every consumer pins a
+     Safari floor through `tdsViteBuild`, so the prefix is added at build
+     time. (tds-blog-frontend's local copy authors both by hand; verify the
+     BUILT css carries `mask` and `-webkit-mask`, not just one of them.) */
+  mask: var(--tds-brand-logo-mask) center / contain no-repeat;
+}
+.brand-logo--inverse {
+  background-color: #fff;
+}

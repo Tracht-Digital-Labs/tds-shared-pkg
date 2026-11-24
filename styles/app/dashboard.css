@@ -1,0 +1,401 @@
+/* === Dashboard widget grid ======================================== */
+
+/* The widget host on the panel dashboard. `.dashboard-grid` carried no
+   `display: grid` at all for a long time, so the "grid" was a plain block
+   stack; widgets size themselves via `data-size`.
+   The gap carries each tile's 6px hard offset: at 1rem the shadow ate more
+   than a third of it and the tiles read as one block. */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+.widget-slot {
+  min-width: 0;
+}
+.widget-slot[data-size="md"] {
+  grid-column: span 2;
+}
+.widget-slot[data-size="lg"] {
+  grid-column: span 3;
+}
+@media (max-width: 40rem) {
+  .widget-slot[data-size="md"],
+  .widget-slot[data-size="lg"] {
+    grid-column: auto;
+  }
+}
+
+/* === Panel top bar ================================================
+   The desktop header above the page canvas — the panel had none at all
+   until the profile menu needed somewhere to live, so `<main>` started
+   straight at the page content and nothing in the shell ever said who
+   was logged in.
+
+   Panel-only-by-name chrome like `.portal-sidebar`, so it needs no
+   `[data-surface="panel"]` scope; the tools site imports app.css for
+   the card elevation and simply never renders this element.
+
+   Transparent on purpose. `[data-surface="panel"] .panel-main` paints a
+   radial glow anchored top-RIGHT — exactly where this bar sits — and a
+   solid `--color-paper` band would slice the top off it. The hairline
+   alone is enough separation, and `backdrop-filter` on scroll would only
+   blur a background this element does not own. */
+.panel-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  /* NO `display` here, deliberately — same as `.portal-sidebar`. The shell
+     writes `hidden lg:flex`, and a `display: flex` in app.css would WIN
+     against Tailwind's `.hidden` (equal specificity, and app.css lands after
+     the utilities), so the bar rendered a second time under the mobile
+     header. Nothing errors; you just get two bars. Layout owns display. */
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  min-height: 3.25rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--color-line);
+  /* Semi-opaque rather than transparent: content scrolling underneath a
+     fully see-through sticky bar collides with the avatar. This keeps the
+     canvas glow visible while still reading as a surface. */
+  background: color-mix(in srgb, var(--color-paper) 88%, transparent);
+  backdrop-filter: blur(8px);
+}
+@media (min-width: 40rem) {
+  .panel-topbar {
+    padding-inline: 1.5rem;
+  }
+}
+/* Matches the host's `lg:px-10` on `<main>`, so the avatar's right edge
+   lines up with the content column under it. */
+@media (min-width: 64rem) {
+  .panel-topbar {
+    padding-inline: 2.5rem;
+  }
+}
+
+/* === Panel canvas ================================================= */
+
+/* The page area next to the rail. Everything from here down is scoped to
+   `[data-surface="panel"]` because app.css is ALSO imported by the blog
+   (for `.editorial-grid`), and these rules target generic primitives
+   (`.tds-card`, `.tds-page__title`, `.tds-widget`) that the blog renders.
+   The rail chrome above needs no scoping — `.portal-sidebar` and friends
+   exist only on a panel.
+
+   The canvas is a 4% accent tint (`--tds-panel-canvas`) plus one soft
+   radial glow anchored top-right. Cards then sit on it as real objects.
+   Before this, page and card were both near-white and the dashboard read
+   as one flat sheet. */
+/* The canvas: the accent glow it always had, plus two very soft brand
+   fields pinned to the OUTER edges. The panel used to be a single flat
+   tint with one glow in the corner, which is exactly the sterile
+   product-UI sheet the "Digitale Maßarbeit" pass replaces — but a
+   dashboard is read for hours, so the fields here run at roughly half
+   the alpha of the marketing `.tds-wash` and stay hard against the left
+   and bottom edges, well away from the content column. */
+[data-surface="panel"] .panel-main {
+  background:
+    radial-gradient(
+      60rem 32rem at 100% 0%,
+      var(--tds-panel-glow) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      42rem 30rem at 0% 22%,
+      rgb(var(--tds-decor-navy) / calc(0.07 * var(--tds-decor-field-strength)))
+        0%,
+      transparent 68%
+    ),
+    radial-gradient(
+      38rem 26rem at 88% 100%,
+      rgb(
+          var(--tds-decor-bordeaux) /
+            calc(0.06 * var(--tds-decor-field-strength))
+        )
+        0%,
+      transparent 66%
+    ),
+    var(--tds-panel-canvas);
+}
+
+/* === Panel page header ============================================ */
+
+/* The one place the panel speaks up: a short accent rule above a larger,
+   heavier title. `--tds-panel-title-size` is a surface token so the
+   marketing/blog surfaces keep the 1.5rem primitives default. */
+[data-surface="panel"] .tds-page__title {
+  font-size: var(--tds-panel-title-size);
+}
+[data-surface="panel"] .tds-page__head {
+  position: relative;
+  padding-top: 0.875rem;
+}
+/* The three-part brand accent, in the panel's own voice. The FIRST (and
+   longest) segment is `--tds-panel-accent`, not the brand bordeaux, so
+   the per-product colour axis survives — the management frontend's rule
+   still reads red and the portal's still reads navy — while segments two
+   and three add the coral/gold rhythm that punctuates the rest of the
+   brand. The proportions are the shared 42 : 20 : 12 tokens, so this and
+   `.tds-brandbar` cannot drift apart. */
+[data-surface="panel"] .tds-page__head::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(
+    var(--tds-brandbar-1) + var(--tds-brandbar-2) + var(--tds-brandbar-3) + 2 *
+      var(--tds-brandbar-gap)
+  );
+  --tds-brandbar-height: 3px;
+  height: var(--tds-brandbar-height);
+  border-radius: var(--tds-radius-pill);
+  background-image:
+    linear-gradient(var(--tds-panel-accent), var(--tds-panel-accent)),
+    linear-gradient(var(--color-accent-pink), var(--color-accent-pink)),
+    linear-gradient(var(--color-gold), var(--color-gold));
+  background-size:
+    var(--tds-brandbar-1) 100%,
+    var(--tds-brandbar-2) 100%,
+    var(--tds-brandbar-3) 100%;
+  background-position:
+    0 0,
+    calc(var(--tds-brandbar-1) + var(--tds-brandbar-gap)) 0,
+    calc(
+        var(--tds-brandbar-1) + var(--tds-brandbar-2) + 2 *
+          var(--tds-brandbar-gap)
+      )
+      0;
+  background-repeat: no-repeat;
+}
+/* Small uppercase kicker above the title, in the accent. Uses the shared
+   eyebrow tokens so it tracks the surface's type voice. */
+[data-surface="panel"] .tds-page__eyebrow {
+  font-family: var(--tds-eyebrow-family);
+  font-weight: var(--tds-eyebrow-weight);
+  letter-spacing: var(--tds-eyebrow-tracking);
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  color: var(--tds-panel-accent);
+}
+/* Section headings inside a page's content. The extensions' islands write a
+   bare `<h2>` / `<h3>` — Lexware's "Kunden", the website CMS's section cards,
+   a form's "Neues Projekt" — and Tailwind's preflight strips every heading to
+   body size and weight, so a section title read like the sentence under it.
+   Bare headings only: anything with a class (`.tds-widget__title`,
+   `.tds-page__title`, a dialog title) styles itself, and rendered markdown
+   keeps `.tds-prose`'s larger scale, which this selector would otherwise
+   outrank. */
+[data-surface="panel"] .tds-page h2:not([class]):not(.tds-prose *),
+[data-surface="panel"] .tds-page h3:not([class]):not(.tds-prose *) {
+  font-family: var(--font-display);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+[data-surface="panel"] .tds-page h2:not([class]):not(.tds-prose *) {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+[data-surface="panel"] .tds-page h3:not([class]):not(.tds-prose *) {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* A stack of cards (users, invoices, any record list built from
+   `.tds-stack` + `.tds-card`) needs room for each card's 6px hard offset:
+   at the stack's 0.75rem the shadow left 6px of air and the cards read as
+   one slab. The public sites space their cards at 1.5rem and more. */
+[data-surface="panel"] .tds-stack:has(> .tds-card) {
+  gap: 1.25rem;
+}
+
+/* === Hued dashboard widgets ======================================= */
+
+/* Every widget was an identical white card: grey uppercase caption, black
+   number, no hue, no icon, no lift. The host now sets `--tds-widget-hue`
+   per slot (derived from the widget id, so no extension has to change),
+   and the tint convention from base.css does the rest — 3px top rule,
+   ~6% wash, 35% border. Same visual family as `.stat-tile--toned`. */
+[data-surface="panel"] .widget-slot {
+  --tds-widget-hue: var(--tds-panel-accent);
+  position: relative;
+}
+[data-surface="panel"] .widget-slot .tds-widget {
+  position: relative;
+  border-top: 3px solid var(--tds-widget-hue);
+  border-color: color-mix(in srgb, var(--tds-widget-hue) 35%, var(--color-line));
+  border-top-color: var(--tds-widget-hue);
+  background: color-mix(in srgb, var(--tds-widget-hue) 6%, var(--color-card));
+  transition: transform var(--tds-dur-base) var(--tds-ease-out);
+}
+/* The hover elevation as a FADING OVERLAY, not an animated `box-shadow`.
+   Transitioning the shadow itself re-rasterises a 32px blur every frame —
+   and because the hover also translates the widget, that repaint was landing
+   on an element the transform had already promoted to its own layer, which
+   is the most expensive combination available. An `opacity` fade on a
+   pseudo-element carrying the raised shadow is compositor-only.
+   `.tds-widget` is already `position: relative` (set just above), so this
+   introduces no new containing block. */
+[data-surface="panel"] .widget-slot .tds-widget::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--tds-elevation-raised);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--tds-dur-base) var(--tds-ease-out);
+}
+[data-surface="panel"] .widget-slot .tds-widget__title {
+  color: color-mix(in srgb, var(--tds-widget-hue) 75%, var(--color-muted));
+  /* Leave room for the corner icon so a long title never runs under it. */
+  padding-right: 2rem;
+}
+/* The corner icon, rendered by the host into the slot (the `.tds-widget`
+   markup itself belongs to each extension and is not touched). */
+[data-surface="panel"] .widget-slot__icon {
+  position: absolute;
+  top: 0.875rem;
+  right: 0.875rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  color: var(--tds-widget-hue);
+  background: color-mix(in srgb, var(--tds-widget-hue) 14%, transparent);
+  pointer-events: none;
+}
+
+/* === Panel hover elevation ======================================== */
+
+/* Resting cards take `--tds-elevation-card` (the panel's smallest shadow,
+   set in surfaces/panel.css); hovering lifts them to `--tds-elevation-raised`.
+   Gated on a real pointer so touch devices never get a stuck hover state. */
+@media (hover: hover) {
+  /* `:focus-within` alongside `:hover` throughout — a widget or card is a
+     container, so what receives focus is a control inside it. Without this a
+     keyboard user gets none of the elevation a mouse user gets. */
+  [data-surface="panel"] .widget-slot .tds-widget:hover,
+  [data-surface="panel"] .widget-slot .tds-widget:focus-within {
+    transform: translateY(-2px);
+  }
+  [data-surface="panel"] .widget-slot .tds-widget:hover::after,
+  [data-surface="panel"] .widget-slot .tds-widget:focus-within::after {
+    opacity: 1;
+  }
+
+  /* Same overlay technique for the card. It needs `position: relative` of
+     its own — `.tds-card` is unpositioned in primitives.css — which is safe
+     here because the overlay is the only absolutely-positioned child the
+     panel adds. */
+  [data-surface="panel"] .tds-card {
+    position: relative;
+    transition: border-color var(--tds-dur-base) var(--tds-ease-out);
+  }
+  [data-surface="panel"] .tds-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: var(--tds-elevation-raised);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--tds-dur-base) var(--tds-ease-out);
+  }
+  [data-surface="panel"] .tds-card:hover::after,
+  [data-surface="panel"] .tds-card:focus-within::after {
+    opacity: 1;
+  }
+  [data-surface="panel"] .tds-card:hover,
+  [data-surface="panel"] .tds-card:focus-within {
+    border-color: color-mix(
+      in srgb,
+      var(--tds-panel-accent) 30%,
+      var(--color-line)
+    );
+  }
+
+  /* The FLAT variant has no lift. `--tds-elevation-card: none` (see
+     surfaces/panel.css) only clears the RESTING shadow — the hover shadow is
+     drawn by the overlay above, which reads `--tds-elevation-raised`, and
+     that token has to keep its value because the modal and the dropdown
+     depend on it. So the overlay itself goes.
+
+     The `border-color` rule above is left standing: at a border width of 0 it
+     paints nothing, and deleting it would only make the flat case look like
+     the reason it exists. A flat consumer that wants a hover cue owes itself
+     a FILL change on its own interactive element — not on `.tds-card`, which
+     is also the wrapper around non-interactive page content. */
+  [data-surface="panel"][data-flat] .tds-card::after,
+  [data-surface="panel"][data-flat] .widget-slot .tds-widget::after {
+    display: none;
+  }
+}
+
+/* === Touch ergonomics (panel chrome) ============================== */
+
+@media (pointer: coarse) {
+  .nav-item {
+    min-height: 44px;
+  }
+}
+
+/* === Reduced motion (panel chrome) ================================ */
+
+/* Everything the redesign animates, clamped in one place. The transform
+   is reset too, not just the duration — a hover lift that snaps 2px is
+   worse than no lift at all. */
+@media (prefers-reduced-motion: reduce) {
+  /* The duration clamp is base.css's job (globally, with `!important`).
+     What can only be done HERE is resetting the end states — movement that
+     still occurs, just instantly. The elevation overlays are left alone on
+     purpose: a shadow appearing is not motion, and it is the only hover
+     affordance left once the lift is gone. */
+  [data-surface="panel"] .widget-slot .tds-widget:hover,
+  [data-surface="panel"] .widget-slot .tds-widget:focus-within {
+    transform: none;
+  }
+  /* The rail resizes rather than moves, and a rail that jumps between two
+     widths on click is the intended behaviour under `reduce` — but it must
+     not also hold a compositor layer for a transition that no longer runs. */
+  .portal-sidebar.is-animating {
+    will-change: auto;
+  }
+}
+
+/* === Toast placement over the panel rail ========================== */
+
+/* The toast stack (base.css) is fixed bottom-left, which on the panel would
+   land exactly on the rail — and specifically on its foot, where the theme
+   toggle and the collapse button live. The rail is a flex sibling of `main`,
+   not a fixed element, so nothing else pushes the stack aside; it has to be
+   offset here.
+   Scoped to `[data-surface="panel"]`, as every rule in app.css touching a
+   shared primitive must be — the blog imports app.css too and has no rail.
+   `:has()` reads the collapsed state straight off the rail, so the offset
+   follows the toggle with no JS and no second source of truth. */
+@media (min-width: 64rem) {
+  [data-surface="panel"] .tds-toast-host {
+    left: calc(15rem + 1rem); /* .portal-sidebar is w-60 */
+  }
+  [data-surface="panel"]:has(.portal-sidebar.collapsed) .tds-toast-host {
+    left: calc(4.5rem + 1rem); /* .portal-sidebar.collapsed */
+  }
+}
+
+/* === Disclosure rows on a touch screen (2026-10-07) ================
+   A bare <summary> is one line of text tall — 24px in the help centre, the
+   API reference and the time tracker's "Eintrag manuell erfassen", well under
+   the 44px a finger needs. Padding rather than flex: `display: flex` on a
+   summary drops its disclosure marker in Safari and Firefox. */
+@media (pointer: coarse) {
+  [data-surface="panel"] summary {
+    padding-block: 0.625rem;
+  }
+}

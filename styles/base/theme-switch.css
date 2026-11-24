@@ -1,0 +1,207 @@
+/* === Theme switch animation ======================================= */
+
+/* Theme switch (see the shared ThemeToggle component). The incoming theme
+   is captured as the `::view-transition-new(root)` snapshot and animated
+   in JS; here we only disable the default cross-fade and stack the new
+   snapshot above the old one, so whatever JS animates reveals the new
+   theme over the old. Browsers without the View Transitions API ignore
+   this block and the toggle falls back to an instant flip.
+
+   TWO animations run against these rules, chosen by pointer type:
+   a `clip-path` circle growing from the button (fine pointer) and a
+   `transform`-only curtain dropping from the top edge (coarse pointer,
+   where `clip-path` repaints a full-viewport layer every frame). The
+   origin is stated rather than inherited because the default depends on
+   the snapshot's own box. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  transform-origin: center;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
+/* The toggle's icon turns in as the theme flips. The class is only added by
+   a click, and both icons are swapped with `display`, which restarts the
+   animation on the one that appears — so it runs once per flip and never on
+   hydration. */
+@media (prefers-reduced-motion: no-preference) {
+  .tds-theme-toggle__icon--turn {
+    animation: tds-theme-icon-turn var(--tds-dur-bounce) var(--tds-ease-bounce-in) both;
+  }
+}
+/* The plain-DOM toggle (`tds-shared/dom`) shows its icon by the document's
+   theme rather than by script state, so a dark-mode visitor sees the sun
+   before any script runs. The React toggle swaps with utilities instead. */
+.tds-theme-toggle__sun {
+  display: none;
+}
+[data-theme="dark"] .tds-theme-toggle__sun {
+  display: block;
+}
+[data-theme="dark"] .tds-theme-toggle__moon {
+  display: none;
+}
+/* A light preview copy inside a dark page still has the dark root above it;
+   the copy's own attribute has to win. */
+.tds-theme-preview__page[data-theme="light"] .tds-theme-toggle__sun {
+  display: none;
+}
+.tds-theme-preview__page[data-theme="light"] .tds-theme-toggle__moon {
+  display: block;
+}
+@keyframes tds-theme-icon-turn {
+  from {
+    transform: rotate(-120deg) scale(0.4);
+  }
+}
+
+/* --- Theme preview under the pointer (2026-09-29, reshaped 2026-09-30) ----
+   While the toggle is hovered, a bounded circular region around the cursor
+   shows where the page is going: the dark theme's own ground in light mode, the
+   light theme's in dark mode. The element is created and positioned by the
+   shared ThemeToggle; everything it needs beyond the two coordinates is here.
+
+   ### A HARD EDGE, and how it is drawn (asked for 2026-09-30)
+
+   The first version faded out over a quarter of the radius. It read as a smudge
+   rather than as a window, so the edge is now hard: the region either is the
+   other theme's ground or it is not.
+
+   It is still a `radial-gradient`, not `clip-path: circle()`. The gradient's
+   transition is ONE AND A HALF PIXELS — visually a hard edge at any normal
+   viewing distance — and that pixel and a half is what keeps the rim from
+   staircasing. A clip is a binary per-pixel test, so a circle re-evaluated
+   every frame under a moving cursor aliases along its rim and the staircase
+   CRAWLS as the pointer moves, which is far more visible than the softness it
+   removes. `clip-path` is also not compositor-animatable in Chromium, so it
+   would repaint a full-viewport layer per frame; this gradient is one fixed
+   layer the compositor keeps.
+
+   The 1.5px is written as a fraction of the radius via `calc`, so the edge
+   stays one-and-a-half pixels at every clamp step of the radius rather than
+   growing with it.
+
+   ### What fills it
+
+   The OTHER THEME'S PAPER at a high alpha, not a neutral dim — a preview of the
+   dark theme should be the colour the dark theme actually is. It is not a true
+   re-render: the page's own text, cards and photos keep their current theme
+   underneath. Re-rendering a region in the other theme would mean cloning the
+   document and giving the dark tokens a non-`:root` selector, which is a
+   cascade change across every consumer.
+
+   `z-index: 45` clears a sticky header (30) and the landingpage's fixed bar
+   (40) — a preview that the chrome punched a hole in would be a bug report.
+   It never takes a pointer or a focus, and it is `aria-hidden`: nothing is
+   being said here that the button's own label does not already say. */
+/* The radius is a REGISTERED length so it can transition: the circle grows
+   from nothing when the preview opens and shrinks back to nothing when it
+   closes (2026-10-05), in either direction — dark over light, light over
+   dark. An unregistered custom property cannot be interpolated; it would
+   jump. */
+@property --tds-theme-preview-r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+.tds-theme-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+  /* The clone must not be scrollable or selectable, and must never add a
+     scrollbar of its own. */
+  overflow: hidden;
+  opacity: 0;
+  /* Closing: the circle shrinks to a point, quickly and without a bounce.
+     The radius is listed FIRST — the component reads the first transition
+     duration to know when the closed preview may leave the DOM. */
+  transition:
+    --tds-theme-preview-r var(--tds-dur-fast) var(--tds-ease-in-out),
+    opacity var(--tds-dur-fast) var(--tds-ease-in-out);
+  --tds-theme-preview-r: 0px;
+  /* The window, as a mask rather than a fill. The stops are LENGTHS, not
+     percentages, so the edge is exactly 1.5px at every step of the radius
+     clamp — a percentage would be 1.6px at 6rem and 0.9px at 11rem, and
+     `calc()` cannot divide by a length, so deriving one from the radius is not
+     expressible at all.
+
+     `mask` and not `clip-path`: both are per-pixel, but a mask's own 1.5px ramp
+     is anti-aliased, where a clip is a binary test whose rim staircases and
+     whose staircase crawls as the pointer moves. */
+  mask-image: radial-gradient(
+    circle var(--tds-theme-preview-r) at var(--tds-theme-preview-x, 50%)
+      var(--tds-theme-preview-y, 50%),
+    #000 0,
+    #000 calc(var(--tds-theme-preview-r) - 1.5px),
+    transparent var(--tds-theme-preview-r)
+  );
+}
+.tds-theme-preview[data-visible="true"] {
+  opacity: 1;
+  /* The radius scales with the smaller viewport axis, so the region stays a
+     region on a laptop and does not become a vignette on an ultrawide.
+     Opening: it grows from the pointer with a small overshoot. */
+  --tds-theme-preview-r: clamp(6rem, 14vmin, 11rem);
+  transition:
+    --tds-theme-preview-r var(--tds-dur-slow) var(--tds-ease-bounce-in),
+    opacity var(--tds-dur-fast) var(--tds-ease-out);
+}
+
+/* The cloned page inside it.
+
+   `position: absolute` with a top offset the component writes, so the copy lines
+   up with the real page under it at the current scroll position. It carries the
+   TARGET theme (`data-theme` on this element), which is what makes the region the
+   real dark theme instead of a dark sheet — see the note at the dark token block.
+
+   A ground of its own is required: the clone is `<body>`'s children, not `<body>`,
+   so the page background does not come with it and the region would otherwise
+   show the light page through the gaps between blocks. */
+.tds-theme-preview__page {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-color: var(--color-paper);
+  /* And a text colour of its own, for the same reason: `<body>`'s `color`
+     reaches the clone as the page theme's computed value, so any text without
+     a colour rule of its own (the account menu's name) stayed dark on the
+     dark circle. */
+  color: var(--color-ink);
+  /* Nothing inside may animate, transition, or catch a pointer: it is a
+     photograph of the page, and a clone whose reveal animations replay would
+     flicker every time the pointer entered the button. */
+  pointer-events: none;
+}
+.tds-theme-preview__page *,
+.tds-theme-preview__page *::before,
+.tds-theme-preview__page *::after {
+  animation: none !important;
+  transition: none !important;
+}
+/* Belt and braces. The component does not create the element under a
+   reduced-motion preference at all; this covers a preference switched on
+   while one is already on screen. */
+@media (prefers-reduced-motion: reduce) {
+  .tds-theme-preview {
+    display: none;
+  }
+}
+
+/* Every view transition, not only root: the panels name `<main>` for their
+   ClientRouter page swap (`tds-main`), and Astro's generated animations do
+   not consult the preference themselves. The global clamp in base/motion.css
+   cannot reach these pseudo-elements — they are not matched by `*`. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

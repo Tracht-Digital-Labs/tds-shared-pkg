@@ -24,10 +24,13 @@
  * the replacement render would succeed and quietly bake the fallbacks in.
  */
 
+import { jsonResponse as json } from "../http/json.js";
+import { createControl } from "./control.js";
 import { ensureDailyGate } from "./daily.js";
-import { PageCacheStore, tokenMatches, type CacheEntry } from "./store.js";
+import type { EventMap } from "./events.js";
 import { isCacheableMethod } from "./key.js";
-import { resolveEvents, type CacheEvent, type EventMap } from "./events.js";
+import { REFRESH_HEADER, STATUS_HEADER, STORED_CACHE_CONTROL, type CacheStatus } from "./protocol.js";
+import { PageCacheStore, tokenMatches, type StoredPage } from "./store.js";
 
 /** The subset of Astro's middleware context this needs. */
 export interface CacheContext {
@@ -160,13 +163,6 @@ function isStorable(contentType: string): boolean {
   );
 }
 
-function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
-  });
-}
-
 /** The two halves a site mounts. */
 export interface PageCache {
   /**
@@ -182,6 +178,48 @@ export interface PageCache {
    * neither.
    */
   control: (action: string, request: Request, url: URL) => Promise<Response>;
+}
+
+/** Pass a render on unchanged except for the status header; status and headers carry over. */
+function bypass(response: Response): Response {
+  // `response` as the init carries status and headers; a hand-written
+  // `{ status: 200 }` would turn a site's 404s into 200s.
+  const out = new Response(response.body, response);
+  out.headers.set(STATUS_HEADER, "BYPASS" satisfies CacheStatus);
+  return out;
+}
+
+/** A stored entry as a response: 304 on a matching etag, no body for HEAD. */
+function serveHit(request: Request, hit: StoredPage): Response {
+  const status: CacheStatus = "HIT";
+  if (request.headers.get("if-none-match") === hit.meta.etag) {
+    return new Response(null, { status: 304, headers: { etag: hit.meta.etag, [STATUS_HEADER]: status } });
+  }
+  // `Buffer` is not a `BodyInit` under the DOM lib; the view is.
+  return new Response(request.method === "HEAD" ? null : new Uint8Array(hit.body), {
+    status: 200,
+    headers: {
+      "content-type": hit.meta.contentType,
+      etag: hit.meta.etag,
+      [STATUS_HEADER]: status,
+      "cache-control": STORED_CACHE_CONTROL,
+    },
+  });
+}
+
+/**
+ * Whether a render may be filed for every later visitor. A response that sets
+ * a cookie, or asks not to be stored, is per-visitor by definition; caching
+ * one would hand the next visitor somebody else's page.
+ */
+function isStorableResponse(request: Request, response: Response): boolean {
+  return (
+    request.method === "GET" &&
+    response.status === 200 &&
+    isStorable(response.headers.get("content-type") ?? "") &&
+    !response.headers.has("set-cookie") &&
+    !(response.headers.get("cache-control") ?? "").includes("no-store")
+  );
 }
 
 /**
@@ -205,8 +243,6 @@ export function pageCache(options: PageCacheOptions): PageCache {
   } = options;
 
   const store = new PageCacheStore(dir, metaDir);
-  /** Header that forces a fresh render, used by rebuild's own self-requests. */
-  const REFRESH = "x-tds-cache-refresh";
 
   const currentToken = (): string => {
     try {
@@ -216,117 +252,27 @@ export function pageCache(options: PageCacheOptions): PageCache {
     }
   };
 
-  async function control(action: string, request: Request, url: URL): Promise<Response> {
-    const activeToken = currentToken();
-    if (!activeToken) {
-      return json({ error: "cache_token_not_configured" }, 503);
-    }
-    const given =
-      request.headers.get("x-tds-cache-token") ??
-      request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ??
-      null;
-    if (!tokenMatches(activeToken, given)) {
-      return json({ error: "unauthorized" }, 401);
-    }
+  const control = createControl({ store, events, currentToken, onInvalidate, alwaysPaths, rebuildUrl, concurrency });
 
-    if (action === "status" && request.method === "GET") {
-      const entries = await store.list();
-      return json({
-        directory: store.directory,
-        count: entries.length,
-        newest: entries[0]?.renderedAt ?? null,
-        oldest: entries[entries.length - 1]?.renderedAt ?? null,
-        bytes: entries.reduce((sum, e) => sum + e.bytes, 0),
-        entries: entries.slice(0, 500),
-      });
-    }
-
-    if (request.method !== "POST") {
-      return json({ error: "method_not_allowed" }, 405);
-    }
-
-    let payload: { events?: CacheEvent[]; paths?: string[]; all?: boolean };
+  /** Buffer the render, file it under `key`, and hand back a fresh response. */
+  async function storeAndServe(key: string, response: Response, status: CacheStatus): Promise<Response> {
+    // Buffer once rather than cloning: a clone whose body is never read keeps
+    // the stream alive, and Astro's response bodies are streams.
+    const body = Buffer.from(await response.arrayBuffer());
+    let etag: string | undefined;
     try {
-      payload = (await request.json()) as typeof payload;
-    } catch {
-      return json({ error: "invalid_json" }, 400);
+      etag = (await store.write(key, body, response.headers.get("content-type") ?? ""))?.etag;
+    } catch (err) {
+      // An unwritable cache directory must not take the site down; every
+      // request renders, which is what happened before this component existed.
+      logger(`[tds-cache] could not store ${key}: ${String(err)}`);
     }
 
-    const resolved = await resolveEvents(events, payload.events ?? []);
-    const explicit = (payload.paths ?? []).filter((p) => typeof p === "string" && p.startsWith("/"));
-
-    if (action === "purge") {
-      if (payload.all) {
-        await store.clear();
-        onInvalidate?.();
-        return json({ purged: "all" });
-      }
-      const paths = [...new Set([...resolved.paths, ...explicit])];
-      await Promise.all(paths.map((p) => store.remove(p)));
-      onInvalidate?.();
-      return json({ purged: paths, unknownEvents: resolved.unknown });
-    }
-
-    if (action !== "rebuild") {
-      return json({ error: "not_found" }, 404);
-    }
-
-    let paths: string[];
-    if (payload.all) {
-      const cached = (await store.list()).map((e: CacheEntry) => e.path);
-      paths = [...new Set([...cached, ...alwaysPaths])].sort();
-    } else {
-      paths = [...new Set([...resolved.paths, ...explicit])];
-    }
-
-    // Read through on every render this rebuild performs, or it faithfully
-    // re-renders the content the process read at boot.
-    onInvalidate?.();
-
-    const rebuilt: string[] = [];
-    const skipped: string[] = [];
-    const failed: Array<{ path: string; status: number | string }> = [];
-    const queue = [...paths];
-
-    const worker = async (): Promise<void> => {
-      for (;;) {
-        const path = queue.shift();
-        if (path === undefined) return;
-        try {
-          const target = rebuildUrl
-            ? rebuildUrl(path, url.origin)
-            : new URL(path, url.origin).toString();
-          const res = await fetch(target, {
-            headers: { [REFRESH]: activeToken },
-          });
-          // Drain the body so the connection is released even when we do not
-          // need the bytes — the middleware already stored them.
-          await res.arrayBuffer();
-          if (!res.ok) {
-            failed.push({ path, status: res.status });
-          } else if (res.headers.get("x-tds-cache") === "BYPASS") {
-            // Rendered fine, stored nothing: an unstorable content type, or a
-            // response the render marked `no-store`. Reported separately
-            // because calling it "rebuilt" is how a path stays permanently
-            // uncached while the panel shows a green result every time.
-            skipped.push(path);
-          } else {
-            rebuilt.push(path);
-          }
-        } catch (err) {
-          failed.push({ path, status: String(err) });
-        }
-      }
-    };
-
-    await Promise.all(Array.from({ length: Math.max(1, concurrency) }, worker));
-
-    return json({
-      rebuilt: rebuilt.sort(),
-      skipped: skipped.sort(),
-      failed,
-      unknownEvents: resolved.unknown,
-    });
+    const headers = new Headers(response.headers);
+    headers.set(STATUS_HEADER, status);
+    headers.set("cache-control", STORED_CACHE_CONTROL);
+    if (etag) headers.set("etag", etag);
+    return new Response(new Uint8Array(body), { status: 200, headers });
   }
 
   async function middleware(context: CacheContext, next: CacheNext): Promise<Response> {
@@ -337,89 +283,26 @@ export function pageCache(options: PageCacheOptions): PageCache {
     // `context.request` there warns per route and would store build-time
     // renders as if a visitor had asked for them.
     if (context.isPrerendered) return next();
-
     if (!enabled || !isCacheableMethod(request.method)) return next();
 
     // A new day empties the store before anything is read from it.
     if (dailyRefresh && metaDir && ensureDailyGate(dir, metaDir, new Date(), logger)) onInvalidate?.();
 
-    // Where this render is filed. `null` from a site's own resolver means the
-    // request is not cacheable at all — a host it does not recognise, say.
+    // `null` from a site's own resolver means "not cacheable at all" — a host
+    // it does not recognise, say.
     const key = cacheKey ? cacheKey(context) : url.pathname;
-    if (key === null) {
-      const uncacheable = await next();
-      // `response` as the second argument carries status and headers over; a
-      // hand-written `{ status: 200 }` would turn this site's 404s into 200s.
-      const out = new Response(uncacheable.body, uncacheable);
-      out.headers.set("x-tds-cache", "BYPASS");
-      return out;
-    }
+    if (key === null) return bypass(await next());
 
     const activeToken = currentToken();
-    const refreshing = activeToken !== "" && tokenMatches(activeToken, request.headers.get(REFRESH));
-
+    const refreshing = activeToken !== "" && tokenMatches(activeToken, request.headers.get(REFRESH_HEADER));
     if (!refreshing) {
       const hit = await store.read(key);
-      if (hit) {
-        if (request.headers.get("if-none-match") === hit.meta.etag) {
-          return new Response(null, {
-            status: 304,
-            headers: { etag: hit.meta.etag, "x-tds-cache": "HIT" },
-          });
-        }
-        // `Buffer` is not a `BodyInit` under the DOM lib; the view is.
-        return new Response(request.method === "HEAD" ? null : new Uint8Array(hit.body), {
-          status: 200,
-          headers: {
-            "content-type": hit.meta.contentType,
-            etag: hit.meta.etag,
-            "x-tds-cache": "HIT",
-            "cache-control": "public, max-age=0, must-revalidate",
-          },
-        });
-      }
+      if (hit) return serveHit(request, hit);
     }
 
     const response = await next();
-
-    const contentType = response.headers.get("content-type") ?? "";
-    const storable =
-      request.method === "GET" &&
-      response.status === 200 &&
-      isStorable(contentType) &&
-      // A response that sets a cookie, or asks not to be stored, is per-visitor
-      // by definition. Caching one would hand the next visitor somebody else's
-      // page — the single worst failure this component can have.
-      !response.headers.has("set-cookie") &&
-      !(response.headers.get("cache-control") ?? "").includes("no-store");
-
-    if (!storable) {
-      const out = new Response(response.body, response);
-      out.headers.set("x-tds-cache", "BYPASS");
-      return out;
-    }
-
-    // Buffer once and hand back a fresh Response rather than cloning: a clone
-    // whose body is never read keeps the stream alive, and Astro's response
-    // bodies are streams.
-    const body = Buffer.from(await response.arrayBuffer());
-    let etag: string | undefined;
-    try {
-      const meta = await store.write(key, body, contentType);
-      etag = meta?.etag;
-    } catch (err) {
-      // An unwritable cache directory must not take the site down; it just
-      // means every request renders, which is what happened before this
-      // component existed.
-      logger(`[tds-cache] could not store ${key}: ${String(err)}`);
-    }
-
-    const headers = new Headers(response.headers);
-    headers.set("x-tds-cache", refreshing ? "REFRESH" : "MISS");
-    headers.set("cache-control", "public, max-age=0, must-revalidate");
-    if (etag) headers.set("etag", etag);
-
-    return new Response(new Uint8Array(body), { status: 200, headers });
+    if (!isStorableResponse(request, response)) return bypass(response);
+    return storeAndServe(key, response, refreshing ? "REFRESH" : "MISS");
   }
 
   return {

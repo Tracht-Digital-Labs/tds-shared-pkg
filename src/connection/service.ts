@@ -6,6 +6,7 @@ import type {
   PublicConnectionStatus,
   SiteConnection,
 } from "./types.js";
+import { jsonResponse as json } from "../http/json.js";
 
 const RUNTIME_KEYS: RuntimeKey[] = [
   "apiBase",
@@ -52,17 +53,6 @@ function runtimeOf(
   value: Partial<RuntimeConfig> | (() => Partial<RuntimeConfig>) | undefined,
 ): Partial<RuntimeConfig> {
   return typeof value === "function" ? value() : (value ?? {});
-}
-
-function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "cache-control": "no-store",
-      "x-content-type-options": "nosniff",
-    },
-  });
 }
 
 function isLoopback(hostname: string): boolean {

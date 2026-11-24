@@ -1,0 +1,45 @@
+/* ---- Directional page transitions on phones ----
+   `tds-shared/astro`'s `pageDirectionScript` tags each cross-document
+   transition `forward` or `back`; on a phone the page slides like an app
+   screen instead of cross-fading. Desktop keeps the fade from
+   page-transitions.css. */
+@media (max-width: 63.99rem) and (prefers-reduced-motion: no-preference) {
+  :root:active-view-transition-type(forward)::view-transition-old(root) {
+    animation: tds-slide-out-left var(--tds-dur-base, 240ms) var(--tds-ease-out, ease-out) both;
+  }
+  :root:active-view-transition-type(forward)::view-transition-new(root) {
+    animation: tds-slide-in-right var(--tds-dur-base, 240ms) var(--tds-ease-out, ease-out) both;
+  }
+  :root:active-view-transition-type(back)::view-transition-old(root) {
+    animation: tds-slide-out-right var(--tds-dur-base, 240ms) var(--tds-ease-out, ease-out) both;
+  }
+  :root:active-view-transition-type(back)::view-transition-new(root) {
+    animation: tds-slide-in-left var(--tds-dur-base, 240ms) var(--tds-ease-out, ease-out) both;
+  }
+  /* The tab bar is identical on both pages: keep it still. */
+  .tds-tabbar { view-transition-name: tds-tabbar; }
+  ::view-transition-group(tds-tabbar) { animation: none; }
+}
+@keyframes tds-slide-out-left { to { transform: translateX(-24%); opacity: 0; } }
+@keyframes tds-slide-in-right { from { transform: translateX(30%); opacity: 0; } }
+@keyframes tds-slide-out-right { to { transform: translateX(24%); opacity: 0; } }
+@keyframes tds-slide-in-left { from { transform: translateX(-30%); opacity: 0; } }
+
+/* Installed (standalone) app: no browser chrome around it, so the top needs
+   the notch inset the browser would otherwise have absorbed. */
+@media (display-mode: standalone) {
+  .tds-app-header { padding-top: env(safe-area-inset-top, 0px); }
+}
+
+/* Theme and language swipes (tds-shared/app `swipeTransition`): the new
+   state slides in over the old one, horizontally, from the side of the
+   control that was tapped. Transform only, so the compositor moves two
+   finished snapshots and nothing repaints. */
+:root:active-view-transition-type(swipe-left)::view-transition-group(root),
+:root:active-view-transition-type(swipe-right)::view-transition-group(root) {
+  animation-duration: var(--tds-dur-slow, 360ms);
+}
+
+@media print {
+  .tds-tabbar, dialog.tds-sheet, .tds-tabpage { display: none !important; }
+}

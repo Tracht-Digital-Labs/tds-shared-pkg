@@ -1,8 +1,7 @@
 // @vitest-environment jsdom
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { offscreenAnimationScript } from "../astro";
+import { readStylesheet } from "./stylesheet";
 
 /**
  * jsdom has neither IntersectionObserver nor Web Animations, so both are
@@ -106,7 +105,7 @@ describe("offscreenAnimationScript", () => {
   });
 
   it("pairs with the stylesheet rule that pauses marked elements", async () => {
-    const css = readFileSync(join(__dirname, "../../styles/base.css"), "utf8");
+    const css = readStylesheet("base.css");
     expect(css).toMatch(/\[data-tds-offscreen\] \*::after \{\s*animation-play-state: paused !important;/);
     await flush();
   });

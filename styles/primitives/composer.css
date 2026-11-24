@@ -1,0 +1,28 @@
+/* === Composer ===================================================== */
+
+/* A reply box: field above, actions below. Used by the contact-message reply
+   and the live-chat composer. */
+.tds-compose {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.tds-compose > :is(textarea, input) {
+  width: 100%;
+  resize: vertical;
+}
+.tds-compose__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* === Toolbar ====================================================== */
+
+.tds-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
