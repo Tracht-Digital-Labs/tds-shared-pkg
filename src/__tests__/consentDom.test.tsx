@@ -122,6 +122,30 @@ describe("the plain-DOM banner behaves like the React one", () => {
     expect(mountDom(asking).querySelector("aside")).toBeNull();
   });
 
+  it("records which purposes it showed", () => {
+    const host = mountDom(asking);
+    click(byText(host, "Nur notwendige"));
+    expect(readConsent()?.shown).toEqual(["analytics", "marketing"]);
+  });
+
+  it("asks again about a purpose added after the visitor decided", () => {
+    writeConsent(necessaryOnly(), "de", ["analytics"]);
+    const host = mountDom({ categories: ["analytics", "functional"], askAgainFor: ["functional"] });
+    expect(host.querySelector("aside")).not.toBeNull();
+  });
+
+  it("asks again when the stored decision predates the list of shown purposes", () => {
+    writeConsent(necessaryOnly(), "de");
+    const host = mountDom({ categories: ["analytics", "functional"], askAgainFor: ["functional"] });
+    expect(host.querySelector("aside")).not.toBeNull();
+  });
+
+  it("stays away when the visitor was already asked about the added purpose", () => {
+    writeConsent(necessaryOnly(), "de", ["analytics", "functional"]);
+    const host = mountDom({ categories: ["analytics", "functional"], askAgainFor: ["functional"] });
+    expect(host.querySelector("aside")).toBeNull();
+  });
+
   it("takes focus only when it asks something", () => {
     const host = mountDom(asking);
     expect(document.activeElement).toBe(host.querySelector("aside"));

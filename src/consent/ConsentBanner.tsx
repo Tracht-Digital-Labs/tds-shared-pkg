@@ -17,6 +17,8 @@ export interface ConsentBannerProps {
    * to click the first button on every site they visit.
    */
   categories?: readonly OptionalCategory[];
+  /** Categories added after visitors had decided; see `MountConsentBannerOptions.askAgainFor`. */
+  askAgainFor?: readonly OptionalCategory[];
   /**
    * Wording of the informational variant (only used when `categories` is
    * empty): `"site"` for the public properties, `"panel"` where a technically
@@ -66,6 +68,7 @@ const DEFAULT_PRIVACY_URL = "https://tracht-digital.de/legal/datenschutz";
 export default function ConsentBanner({
   lang = "de",
   categories = [],
+  askAgainFor = [],
   variant = "site",
   privacyUrl = DEFAULT_PRIVACY_URL,
   imprintUrl,
@@ -73,13 +76,14 @@ export default function ConsentBanner({
   const host = useRef<HTMLSpanElement>(null);
   // The options are read once, like the island's props: a consent banner
   // does not change its purposes while the page is open.
-  const key = `${lang}|${categories.join(",")}|${variant}|${privacyUrl}|${imprintUrl ?? ""}`;
+  const key = `${lang}|${categories.join(",")}|${askAgainFor.join(",")}|${variant}|${privacyUrl}|${imprintUrl ?? ""}`;
   useEffect(() => {
     if (!host.current) return;
     return mountConsentBanner({
       host: host.current,
       lang,
       categories,
+      askAgainFor,
       variant,
       privacyUrl,
       imprintUrl,

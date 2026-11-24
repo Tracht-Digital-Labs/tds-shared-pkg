@@ -52,13 +52,22 @@ export const CONSENT_VERSION = 2;
  * `tds-ad-consent` key, whose original timestamp was never recorded. Inventing
  * one would be fabricating evidence, so it stays null and reads as "decided,
  * time unknown".
+ *
+ * `shown` lists the optional categories the banner presented when the visitor
+ * decided. A site that adds a category asks again everyone whose record does
+ * not list it (`askAgainFor` on the banner); older records carry no list.
  */
 export interface ConsentRecord {
   v: number;
   ts: string | null;
   lang: string;
   choices: ConsentChoices;
+  shown?: OptionalCategory[];
 }
+
+/** Narrowing helper for an optional category arriving from storage or markup. */
+export const isOptionalCategory = (v: unknown): v is OptionalCategory =>
+  typeof v === "string" && (OPTIONAL_CATEGORIES as readonly string[]).includes(v);
 
 /** Every optional category off. The state a "Nur notwendige" click produces. */
 export const necessaryOnly = (): ConsentChoices => ({
