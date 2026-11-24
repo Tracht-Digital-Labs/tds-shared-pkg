@@ -6,8 +6,8 @@
  * Character, quoting the design-system handoff verbatim:
  *   "KANTIG: keine Rundungen, kaum Borders — Abgrenzung über Farbflächen."
  * No radii anywhere, no elevation; separation comes from colour blocks
- * (`--color-soft`, `--tds-flat-tint`) and 2px accent bars instead of
- * hairline-bordered rounded cards. Display voice is the heavier 800.
+ * (`--color-soft`, `--tds-flat-tint`) instead of hairline-bordered rounded
+ * cards; no stripe along a box's left edge. Display voice is the heavier 800.
  *
  * Usage — `data-surface="blog"` on <html>, plus:
  *

@@ -1,8 +1,8 @@
 /* === Sidebar nav items =========================================== */
 
 /* Shared nav-link treatment for the panel sidebars. The active item gets a
-   tinted wayfinding fill + a 2px left indicator bar in the primary (or a
-   per-item `--nav-hue`).
+   tinted wayfinding fill and a border in the primary (or a per-item
+   `--nav-hue`); no stripe on the edge.
    The host shell must actually APPLY `.nav-item--active` — it ships
    `data-nav` attributes on each link, and for a long while nothing read
    them, so this active treatment was dead code from the panel's point of
@@ -88,36 +88,9 @@
      `color-mix(var(--x) …)` to bare `var(--x)` — which, with the label also
      reading `--nav-ink`, rendered the row's text in its own background
      colour on any engine without `color-mix`. The hue still identifies the
-     row through the ink, the border, the indicator bar and the icon chip. */
+     row through the ink, the border and the icon chip. */
   background: rgb(255 255 255 / 0.1);
   border-color: color-mix(in srgb, var(--nav-ink) 30%, transparent);
-}
-/* Left indicator bar. Drawn on every item but scaled to nothing until
-   active, so it GROWS into place instead of appearing — `scaleY` and
-   `opacity` are both compositor-only, and an unstyled non-active item
-   still paints nothing. */
-.nav-item::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 2px;
-  height: 1.25rem;
-  border-radius: 1px;
-  background: var(--nav-ink);
-  opacity: 0;
-  transform: translateY(-50%) scaleY(0.2);
-  transition:
-    opacity var(--tds-dur-base) var(--tds-ease-out),
-    transform var(--tds-dur-base) var(--tds-ease-out);
-}
-.nav-item--active::before {
-  opacity: 1;
-  transform: translateY(-50%) scaleY(1);
-}
-/* Collapsed icon rail hides the indicator bar (the rail is centred). */
-.portal-sidebar.collapsed .nav-item::before {
-  display: none;
 }
 
 /* Small uppercase group heading between nav sections. Promoted from the
@@ -216,9 +189,8 @@
 
 /* The rail collapses to an icon strip, toggled by the host shell
    (`sidebarCollapse.ts` adds `.collapsed` and persists the choice).
-   `.portal-sidebar.collapsed` previously had exactly ONE rule — hiding
-   the active indicator — with nothing to actually collapse; the width,
-   the label hiding and the tooltip below are what make it a feature.
+   The width, the label hiding and the tooltip below are what make it a
+   feature.
 
    Only the rail collapses. The mobile `.nav-drawer-panel` shares the
    rail's surface but is already a deliberate full-label overlay. */

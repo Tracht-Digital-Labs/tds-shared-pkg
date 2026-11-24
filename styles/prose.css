@@ -223,18 +223,15 @@
    finally square — it used to carry a hard-coded 0.4rem, which the blog's
    own AGENTS.md flagged as breaking the flat kit. */
 .tds-prose .tds-callout {
-  border-left: 3px solid var(--color-info);
   background: color-mix(in srgb, var(--color-info) 8%, transparent);
   padding: 0.85rem 1.1rem;
   border-radius: var(--tds-radius-alert);
   margin: 1.5rem 0;
 }
 .tds-prose .tds-callout--warn {
-  border-color: var(--color-warning);
   background: color-mix(in srgb, var(--color-warning) 8%, transparent);
 }
 .tds-prose .tds-callout--tip {
-  border-color: var(--color-success);
   background: color-mix(in srgb, var(--color-success) 8%, transparent);
 }
 
