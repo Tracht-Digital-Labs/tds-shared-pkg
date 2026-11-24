@@ -585,12 +585,11 @@ describe("surface character", () => {
     // The categorical palette is tuned for dark text on a light canvas. Used
     // raw as ink on the dark rail it lands around 2:1. Every place the active
     // nav item paints text or a glyph must read --nav-ink, not --nav-hue.
-    for (const decl of [
-      "color: var(--nav-ink)",
-      "background: var(--nav-ink)",
-    ]) {
-      expect(app, `${decl} missing — active nav lost its lifted ink`).toContain(decl);
-    }
+    expect(app, "active nav lost its lifted ink").toContain("color: var(--nav-ink)");
+  });
+
+  it("draws no stripe on the left edge of a nav item", () => {
+    expect(app).not.toMatch(/\.nav-item[^{]*::before/);
   });
 
   it("makes the dark rail descend rather than brighten", () => {
