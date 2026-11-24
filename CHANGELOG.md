@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **The consent banner can ask again about a purpose a site added.** A decision now records the
+  categories the banner showed (`ConsentRecord.shown`); `askAgainFor` on `mountConsentBanner`,
+  `ConsentBanner` and `consentBannerHostMarkup` shows the banner to every visitor whose decision
+  was not asked about those categories. `askedAbout(record, categories)` is exported.
+
 ## [0.64.16] — 2026-11-11
 
 ### Fixed

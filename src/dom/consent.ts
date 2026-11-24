@@ -30,12 +30,19 @@
 import { translations, type Language } from "../i18n/translations";
 import {
   grantShown,
+  isOptionalCategory,
   necessaryOnly,
   restrictToShown,
   type ConsentChoices,
   type OptionalCategory,
 } from "../consent/categories";
-import { CONSENT_OPEN_EVENT, readConsent, takeConsentOpenRequest, writeConsent } from "../consent/store.js";
+import {
+  CONSENT_OPEN_EVENT,
+  askedAbout,
+  readConsent,
+  takeConsentOpenRequest,
+  writeConsent,
+} from "../consent/store.js";
 import { whenIdle } from "./idle.js";
 
 export interface MountConsentBannerOptions {
@@ -43,6 +50,13 @@ export interface MountConsentBannerOptions {
   lang?: Language;
   /** The optional purposes this site uses, in display order (see `ConsentBanner`). */
   categories?: readonly OptionalCategory[];
+  /**
+   * Categories the site added after visitors had decided. A stored decision
+   * that was not asked about each of them (`askedAbout`) shows the banner
+   * again. A site using `client:when="consent"` loads no banner code for a
+   * decided visitor, so it mounts the banner directly to use this.
+   */
+  askAgainFor?: readonly OptionalCategory[];
   /** Wording of the informational variant (only used when `categories` is empty). */
   variant?: "site" | "panel";
   /** Link target for the privacy policy. */
@@ -100,6 +114,7 @@ export function mountConsentBanner(options: MountConsentBannerOptions = {}): () 
 function mount({
   lang = "de",
   categories = [],
+  askAgainFor = [],
   variant = "site",
   privacyUrl = DEFAULT_PRIVACY_URL,
   imprintUrl,
@@ -116,7 +131,7 @@ function mount({
   let exitTimer = 0;
 
   const save = (choices: ConsentChoices) => {
-    writeConsent(restrictToShown(choices, categories), lang);
+    writeConsent(restrictToShown(choices, categories), lang, categories);
     closeSettings();
     hideBanner();
   };
@@ -284,7 +299,8 @@ function mount({
   const onOpen = () => openSettings();
   window.addEventListener(CONSENT_OPEN_EVENT, onOpen);
 
-  if (readConsent() === null) showBanner();
+  const decided = readConsent();
+  if (decided === null || !askedAbout(decided, askAgainFor)) showBanner();
   // A request made before the banner existed (the footer link clicked early).
   if (takeConsentOpenRequest()) openSettings();
 
@@ -321,19 +337,21 @@ export type ConsentBannerHostOptions = Omit<MountConsentBannerOptions, "host" | 
 export function consentBannerHostMarkup({
   lang = "de",
   categories = [],
+  askAgainFor = [],
   variant = "site",
   privacyUrl = DEFAULT_PRIVACY_URL,
   imprintUrl,
 }: ConsentBannerHostOptions = {}): string {
   return (
     `<div data-tds-consent-banner data-lang="${attr(lang)}" data-categories="${attr(categories.join(","))}"` +
+    (askAgainFor.length > 0 ? ` data-ask-again="${attr(askAgainFor.join(","))}"` : "") +
     ` data-variant="${attr(variant)}" data-privacy="${attr(privacyUrl)}"` +
     (imprintUrl ? ` data-imprint="${attr(imprintUrl)}"` : "") +
     ` style="display: contents"></div>`
   );
 }
 
-const OPTIONAL = new Set<string>(["functional", "analytics", "marketing"]);
+const categoryList = (value = ""): OptionalCategory[] => value.split(",").filter(isOptionalCategory);
 
 /** Mount the banner into the first `consentBannerHostMarkup()` host under `root`; none → no-op. */
 export function mountConsentBannerHost(
@@ -346,7 +364,8 @@ export function mountConsentBannerHost(
   return mountConsentBanner({
     host,
     lang: d.lang === "en" ? "en" : "de",
-    categories: (d.categories ?? "").split(",").filter((c): c is OptionalCategory => OPTIONAL.has(c)),
+    categories: categoryList(d.categories),
+    askAgainFor: categoryList(d.askAgain),
     variant: d.variant === "panel" ? "panel" : "site",
     privacyUrl: d.privacy || DEFAULT_PRIVACY_URL,
     imprintUrl: d.imprint || undefined,

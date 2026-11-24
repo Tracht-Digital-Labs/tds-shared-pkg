@@ -2,10 +2,12 @@ import {
   CONSENT_VERSION,
   allGranted,
   isConsentCategory,
+  isOptionalCategory,
   necessaryOnly,
   type ConsentCategory,
   type ConsentChoices,
   type ConsentRecord,
+  type OptionalCategory,
 } from "./categories";
 import { getAdConsent, setAdConsent } from "./adConsent";
 
@@ -103,7 +105,17 @@ function coerce(value: unknown): ConsentRecord | null {
     ts: typeof o.ts === "string" ? o.ts : null,
     lang: typeof o.lang === "string" ? o.lang : "de",
     choices,
+    ...(Array.isArray(o.shown) ? { shown: o.shown.filter(isOptionalCategory) } : {}),
   };
+}
+
+/**
+ * Whether the visitor was asked about every one of `categories` when they
+ * decided. A record without a `shown` list predates it and was asked about
+ * none of them for certain.
+ */
+export function askedAbout(record: ConsentRecord, categories: readonly OptionalCategory[]): boolean {
+  return categories.every((category) => record.shown?.includes(category) ?? false);
 }
 
 /**
@@ -115,13 +127,21 @@ function coerce(value: unknown): ConsentRecord | null {
  * silently stop advertising working on a site this package cannot see. The
  * write is one-way — the category model is the source of truth, the old key is
  * a projection of it.
+ *
+ * `shown` is what the banner presented; the banner passes it, so a category
+ * added later can be asked about again (`askedAbout`).
  */
-export function writeConsent(choices: ConsentChoices, lang: string): ConsentRecord {
+export function writeConsent(
+  choices: ConsentChoices,
+  lang: string,
+  shown?: readonly OptionalCategory[],
+): ConsentRecord {
   const record: ConsentRecord = {
     v: CONSENT_VERSION,
     ts: new Date().toISOString(),
     lang,
     choices: { ...choices, necessary: true },
+    ...(shown ? { shown: [...shown] } : {}),
   };
 
   if (typeof window === "undefined") return record;
